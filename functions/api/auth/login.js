@@ -36,7 +36,15 @@ export async function onRequestPost(context) {
         // Store in KV: 24 hours expiration
         await context.env.MINAV_KV.put(`session:${token}`, user.id, { expirationTtl: 86400 });
 
-        return new Response(JSON.stringify({ token, user: { username: user.username } }), {
+        // Check if user is using default password (SHA-256 hash of 'admin')
+        const defaultPasswordHash = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
+        const requirePasswordChange = user.password_hash === defaultPasswordHash;
+
+        return new Response(JSON.stringify({
+            token,
+            user: { username: user.username },
+            requirePasswordChange
+        }), {
             headers: { 'Content-Type': 'application/json' }
         });
 

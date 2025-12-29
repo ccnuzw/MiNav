@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 
 export const useAuthStore = defineStore('auth', () => {
     const token = ref(localStorage.getItem('token') || '')
+    const requirePasswordChange = ref(localStorage.getItem('requirePasswordChange') === 'true')
 
     const isAuthenticated = computed(() => !!token.value)
 
@@ -11,9 +12,16 @@ export const useAuthStore = defineStore('auth', () => {
         localStorage.setItem('token', newToken)
     }
 
+    function setRequirePasswordChange(value) {
+        requirePasswordChange.value = value
+        localStorage.setItem('requirePasswordChange', value ? 'true' : 'false')
+    }
+
     function logout() {
         token.value = ''
+        requirePasswordChange.value = false
         localStorage.removeItem('token')
+        localStorage.removeItem('requirePasswordChange')
     }
 
     async function login(username, password) {
@@ -32,6 +40,9 @@ export const useAuthStore = defineStore('auth', () => {
 
             const data = await res.json()
             setToken(data.token)
+            setRequirePasswordChange(data.requirePasswordChange || false)
+
+            return data
         } catch (e) {
             throw e
         }
@@ -51,8 +62,20 @@ export const useAuthStore = defineStore('auth', () => {
             const data = await res.json().catch(() => ({}))
             throw new Error(data.error || 'Failed to change password')
         }
+
+        // 密码更改成功后，清除提示标志
+        setRequirePasswordChange(false)
+
         return await res.json()
     }
 
-    return { token, isAuthenticated, login, logout, changePassword }
+    return {
+        token,
+        isAuthenticated,
+        requirePasswordChange,
+        login,
+        logout,
+        changePassword,
+        setRequirePasswordChange
+    }
 })
