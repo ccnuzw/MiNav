@@ -120,13 +120,13 @@
                         <img v-if="getIconType(item) === 'image'" :src="getIconSrc(item)" alt="Icon" class="w-full h-full object-cover" />
                         <i v-else :class="getIconSrc(item)" class="text-xl text-gray-600 dark:text-gray-300"></i>
                     </div>
-                    <div class="flex-1">
+                    <div class="flex-1 min-w-0">
                         <div class="flex justify-between items-start mb-1">
-                            <h3 class="font-bold text-gray-900 dark:text-white text-lg">
+                            <h3 class="font-bold text-gray-900 dark:text-white text-lg break-all">
                                 <a :href="item.url" target="_blank" class="hover:text-primary dark:hover:text-accent transition">{{ item.name }}</a>
                             </h3>
                         </div>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2">
+                        <p class="text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2 break-words">
                             {{ item.description }}
                         </p>
                         <!-- Tags -->
