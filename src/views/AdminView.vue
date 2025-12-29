@@ -29,6 +29,16 @@
                 class="px-4 py-2 rounded-md text-sm font-medium transition whitespace-nowrap flex-shrink-0"
             >标签管理</button>
             <button 
+                @click="activeTab = 'feeds'"
+                :class="activeTab === 'feeds' ? 'bg-white dark:bg-dark-card shadow' : ''"
+                class="px-4 py-2 rounded-md text-sm font-medium transition whitespace-nowrap flex-shrink-0"
+            >订阅管理</button>
+            <button 
+                @click="activeTab = 'articles'"
+                :class="activeTab === 'articles' ? 'bg-white dark:bg-dark-card shadow' : ''"
+                class="px-4 py-2 rounded-md text-sm font-medium transition whitespace-nowrap flex-shrink-0"
+            >文章管理</button>
+            <button 
                 @click="activeTab = 'settings'"
                 :class="activeTab === 'settings' ? 'bg-white dark:bg-dark-card shadow' : ''"
                 class="px-4 py-2 rounded-md text-sm font-medium transition whitespace-nowrap flex-shrink-0"
@@ -56,6 +66,8 @@
                 <option value="items">项目管理</option>
                 <option value="categories">分类管理</option>
                 <option value="tags">标签管理</option>
+                <option value="feeds">订阅管理</option>
+                <option value="articles">文章管理</option>
                 <option value="settings">网站设置</option>
                 <option value="friendlinks">友情链接</option>
                 <option value="account">账户安全</option>
@@ -83,6 +95,12 @@
         </div>
         <div v-if="activeTab === 'feedbacks'">
             <AdminFeedbacks />
+        </div>
+        <div v-if="activeTab === 'articles'">
+            <AdminArticles />
+        </div>
+        <div v-if="activeTab === 'feeds'">
+            <AdminFeeds />
         </div>
     </div>
 
@@ -183,6 +201,8 @@ import AdminFriendLinks from '../components/AdminFriendLinks.vue';
 import AdminAccount from '../components/AdminAccount.vue';
 import AdminTags from '../components/AdminTags.vue';
 import AdminFeedbacks from '../components/AdminFeedbacks.vue';
+import AdminArticles from '../components/AdminArticles.vue';
+import AdminFeeds from '../components/AdminFeeds.vue'; // New
 
 const authStore = useAuthStore();
 const dataStore = useDataStore();

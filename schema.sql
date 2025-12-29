@@ -93,3 +93,35 @@ CREATE TABLE feedbacks (
 
 -- 添加反馈功能开关设置
 INSERT OR IGNORE INTO site_settings (key, value) VALUES ('feedback_enabled', 'true');
+
+-- 文章表
+-- RSS Feeds Table
+DROP TABLE IF EXISTS rss_feeds;
+CREATE TABLE rss_feeds (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    url TEXT NOT NULL,
+    icon TEXT,
+    status TEXT DEFAULT 'active', -- active, error, inactive
+    last_sync INTEGER,
+    created_at INTEGER DEFAULT (strftime('%s', 'now'))
+);
+
+-- Articles Table (Updated for RSS)
+DROP TABLE IF EXISTS articles;
+CREATE TABLE articles (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    feed_id INTEGER,
+    title TEXT NOT NULL,
+    content TEXT,
+    summary TEXT,
+    cover_image TEXT,
+    original_url TEXT,
+    guid TEXT, -- Unique ID from RSS feed
+    source TEXT, -- Redundant but useful for display (Feed Name)
+    status TEXT DEFAULT 'published', -- published, hidden
+    views INTEGER DEFAULT 0,
+    published_at INTEGER,
+    created_at INTEGER DEFAULT (strftime('%s', 'now')),
+    updated_at INTEGER DEFAULT (strftime('%s', 'now'))
+);
