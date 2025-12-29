@@ -22,10 +22,12 @@
             <a class="flex items-center text-primary dark:text-accent hover:underline cursor-pointer" @click="showSubmitModal = true">
                 提交工具 <span class="ml-1">👉</span>
             </a>
-            <span class="text-gray-300 dark:text-gray-600">|</span>
-            <a class="flex items-center text-primary dark:text-accent hover:underline" href="#">
-                意见反馈 <span class="ml-1">👉</span>
-            </a>
+            <template v-if="settings.feedback_enabled !== 'false'">
+                <span class="text-gray-300 dark:text-gray-600">|</span>
+                <a class="flex items-center text-primary dark:text-accent hover:underline cursor-pointer" @click="showFeedbackModal = true">
+                    意见反馈 <span class="ml-1">👉</span>
+                </a>
+            </template>
         </div>
     </div>
 
@@ -196,7 +198,31 @@
     </div>
 </teleport>
 
-
+<!-- Feedback Modal -->
+<teleport to="body">
+    <div v-if="showFeedbackModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white dark:bg-dark-card p-6 rounded-lg w-full max-w-md shadow-xl">
+            <h3 class="text-xl font-bold mb-4 dark:text-white">意见反馈</h3>
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">您的反馈对我们非常重要，感谢您的建议！</p>
+            <form @submit.prevent="handleFeedbackSubmit" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium dark:text-gray-300">邮箱 (可选)</label>
+                    <input v-model="feedbackForm.email" type="email" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="方便我们联系您" />
+                </div>
+                <div>
+                    <label class="block text-sm font-medium dark:text-gray-300">建议内容 <span class="text-red-500">*</span></label>
+                    <textarea v-model="feedbackForm.content" rows="4" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" required placeholder="请输入您的建议或反馈..."></textarea>
+                </div>
+                <div class="flex justify-end space-x-2 mt-6">
+                    <button type="button" @click="showFeedbackModal = false" class="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400">取消</button>
+                    <button type="submit" :disabled="feedbackSubmitting" class="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover disabled:opacity-50">
+                        {{ feedbackSubmitting ? '提交中...' : '提交反馈' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</teleport>
 
 </template>
 <script setup>
@@ -218,6 +244,30 @@ const showSortDropdown = ref(false);
 const showCategoryDropdown = ref(false);
 const sortDropdownRef = ref(null);
 const categoryDropdownRef = ref(null);
+
+// 反馈模态框
+const showFeedbackModal = ref(false);
+const feedbackForm = ref({ email: '', content: '' });
+const feedbackSubmitting = ref(false);
+
+// 提交反馈
+const handleFeedbackSubmit = async () => {
+    if (!feedbackForm.value.content.trim()) {
+        alert('请输入反馈内容');
+        return;
+    }
+    feedbackSubmitting.value = true;
+    try {
+        await dataStore.submitFeedback(feedbackForm.value);
+        alert('反馈提交成功，感谢您的建议！');
+        showFeedbackModal.value = false;
+        feedbackForm.value = { email: '', content: '' };
+    } catch (e) {
+        alert('提交失败: ' + e.message);
+    } finally {
+        feedbackSubmitting.value = false;
+    }
+};
 
 // 选择排序方式
 const selectSort = (value) => {

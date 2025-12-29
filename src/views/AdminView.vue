@@ -41,6 +41,11 @@
                 :class="activeTab === 'account' ? 'bg-white dark:bg-dark-card shadow' : ''"
                 class="px-4 py-2 rounded-md text-sm font-medium transition"
             >账户安全</button>
+            <button 
+                @click="activeTab = 'feedbacks'"
+                :class="activeTab === 'feedbacks' ? 'bg-white dark:bg-dark-card shadow' : ''"
+                class="px-4 py-2 rounded-md text-sm font-medium transition"
+            >反馈管理</button>
         </div>
 
         <div v-if="activeTab === 'items'">
@@ -61,6 +66,9 @@
         <div v-if="activeTab === 'account'">
             <AdminAccount />
         </div>
+        <div v-if="activeTab === 'feedbacks'">
+            <AdminFeedbacks />
+        </div>
     </div>
   </div>
 </template>
@@ -76,6 +84,7 @@ import AdminSettings from '../components/AdminSettings.vue';
 import AdminFriendLinks from '../components/AdminFriendLinks.vue';
 import AdminAccount from '../components/AdminAccount.vue';
 import AdminTags from '../components/AdminTags.vue';
+import AdminFeedbacks from '../components/AdminFeedbacks.vue';
 
 const authStore = useAuthStore();
 const dataStore = useDataStore();

@@ -70,6 +70,30 @@
             </div>
         </div>
         
+        <hr class="border-gray-200 dark:border-gray-700" />
+        
+        <!-- 反馈功能开关 -->
+        <div>
+            <label class="block text-sm font-medium mb-2 dark:text-gray-300">意见反馈功能</label>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">开启后，首页将显示"意见反馈"链接，用户可以提交反馈建议</p>
+            <div class="flex items-center gap-4">
+                <button 
+                    type="button"
+                    @click="form.feedback_enabled = 'true'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition"
+                    :class="form.feedback_enabled !== 'false' ? 'bg-green-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+                    <i class="fas fa-check mr-1"></i>开启
+                </button>
+                <button 
+                    type="button"
+                    @click="form.feedback_enabled = 'false'"
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition"
+                    :class="form.feedback_enabled === 'false' ? 'bg-red-500 text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">
+                    <i class="fas fa-times mr-1"></i>关闭
+                </button>
+            </div>
+        </div>
+        
         <div class="flex justify-end">
             <button type="submit" :disabled="loading" class="px-6 py-2 bg-primary text-white rounded hover:bg-primary-hover disabled:opacity-50">
                 {{ loading ? 'Saving...' : '保存设置' }}
@@ -86,7 +110,7 @@ import { useAuthStore } from '../stores/auth';
 
 const dataStore = useDataStore();
 const authStore = useAuthStore();
-const form = ref({ hero_title: '', hero_subtitle: '', hero_description: '', site_name: '', site_tagline: '', default_icon: '' });
+const form = ref({ hero_title: '', hero_subtitle: '', hero_description: '', site_name: '', site_tagline: '', default_icon: '', feedback_enabled: 'true' });
 const loading = ref(false);
 
 // 默认图标预览URL计算

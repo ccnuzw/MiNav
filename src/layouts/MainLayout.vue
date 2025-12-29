@@ -67,19 +67,33 @@
             
             <!-- Filters -->
              <div class="space-y-4 mb-8">
-                <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">状态</h4>
-                <div>
-                    <label class="inline-flex items-center cursor-pointer">
-                        <input type="checkbox" value="active" v-model="filters.status" class="form-checkbox h-4 w-4 text-primary dark:text-accent rounded focus:ring-primary dark:focus:ring-accent border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800" />
-                        <span class="ml-2 text-gray-700 dark:text-gray-300 text-sm">Active</span>
-                    </label>
+                <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">状态筛选</h4>
+                <div class="flex flex-wrap gap-2">
+                    <button 
+                        @click="toggleStatusFilter('active')"
+                        class="px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 transform hover:scale-105"
+                        :class="filters.status.includes('active') 
+                            ? 'text-white shadow-md bg-green-500 ring-2 ring-offset-2 ring-green-500 ring-offset-white dark:ring-offset-dark-card' 
+                            : 'text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'">
+                        <i v-if="filters.status.includes('active')" class="fas fa-check mr-1 text-xs"></i>
+                        正常
+                    </button>
+                    <button 
+                        @click="toggleStatusFilter('inactive')"
+                        class="px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 transform hover:scale-105"
+                        :class="filters.status.includes('inactive') 
+                            ? 'text-white shadow-md bg-gray-500 ring-2 ring-offset-2 ring-gray-500 ring-offset-white dark:ring-offset-dark-card' 
+                            : 'text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'">
+                        <i v-if="filters.status.includes('inactive')" class="fas fa-check mr-1 text-xs"></i>
+                        停用
+                    </button>
                 </div>
-                 <div>
-                    <label class="inline-flex items-center cursor-pointer">
-                        <input type="checkbox" value="inactive" v-model="filters.status" class="form-checkbox h-4 w-4 text-primary dark:text-accent rounded focus:ring-primary dark:focus:ring-accent border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800" />
-                        <span class="ml-2 text-gray-700 dark:text-gray-300 text-sm">Inactive</span>
-                    </label>
-                </div>
+                <button 
+                    v-if="filters.status.length > 0" 
+                    @click="filters.status = []" 
+                    class="text-xs text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-accent flex items-center gap-1 mt-2">
+                    <i class="fas fa-times"></i> 清除状态筛选
+                </button>
             </div>
 
             <div class="space-y-4">
@@ -239,6 +253,16 @@ const toggleTagFilter = (tagId) => {
         filters.value.tags.splice(index, 1);
     } else {
         filters.value.tags.push(tagId);
+    }
+}
+
+// 切换状态筛选
+const toggleStatusFilter = (status) => {
+    const index = filters.value.status.indexOf(status);
+    if (index > -1) {
+        filters.value.status.splice(index, 1);
+    } else {
+        filters.value.status.push(status);
     }
 }
 

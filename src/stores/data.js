@@ -273,5 +273,46 @@ export const useDataStore = defineStore('data', () => {
         return await res.json()
     }
 
-    return { items, categories, tags, groupedItems, categoryCounts, filters, loading, error, settings, friendLinks, fetchPublicData, fetchAdminItems, createItem, updateItem, deleteItem, fetchAdminCategories, createCategory, updateCategory, deleteCategory, submitItem, fetchSettings, updateSettings, fetchAdminFriendLinks, createFriendLink, updateFriendLink, deleteFriendLink, fetchAdminTags, createTag, updateTag, deleteTag }
+    // Feedback Actions
+    async function submitFeedback(data) {
+        const res = await fetch('/api/public/feedback', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        })
+        const result = await res.json()
+        if (!res.ok) {
+            throw new Error(result.error || '提交失败')
+        }
+        return result
+    }
+
+    async function fetchFeedbacks(token, status = 'all', page = 1, limit = 20) {
+        const res = await fetch(`/api/admin/feedbacks?status=${status}&page=${page}&limit=${limit}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        if (!res.ok) throw new Error('Failed to fetch feedbacks')
+        return await res.json()
+    }
+
+    async function updateFeedbackStatus(token, id, status) {
+        const res = await fetch(`/api/admin/feedbacks/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ status })
+        })
+        if (!res.ok) throw new Error('Failed to update feedback')
+        return await res.json()
+    }
+
+    async function deleteFeedback(token, id) {
+        const res = await fetch(`/api/admin/feedbacks/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        if (!res.ok) throw new Error('Failed to delete feedback')
+        return await res.json()
+    }
+
+    return { items, categories, tags, groupedItems, categoryCounts, filters, loading, error, settings, friendLinks, fetchPublicData, fetchAdminItems, createItem, updateItem, deleteItem, fetchAdminCategories, createCategory, updateCategory, deleteCategory, submitItem, fetchSettings, updateSettings, fetchAdminFriendLinks, createFriendLink, updateFriendLink, deleteFriendLink, fetchAdminTags, createTag, updateTag, deleteTag, submitFeedback, fetchFeedbacks, updateFeedbackStatus, deleteFeedback }
 })

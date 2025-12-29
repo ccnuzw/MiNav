@@ -80,3 +80,16 @@ CREATE TABLE item_tags (
   FOREIGN KEY (item_id) REFERENCES items(id) ON DELETE CASCADE,
   FOREIGN KEY (tag_id) REFERENCES tags(id) ON DELETE CASCADE
 );
+
+-- 用户反馈表
+DROP TABLE IF EXISTS feedbacks;
+CREATE TABLE feedbacks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  email TEXT,
+  content TEXT NOT NULL,
+  status TEXT DEFAULT 'pending', -- pending, read
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 添加反馈功能开关设置
+INSERT OR IGNORE INTO site_settings (key, value) VALUES ('feedback_enabled', 'true');
