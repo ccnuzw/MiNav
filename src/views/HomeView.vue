@@ -19,7 +19,7 @@
         </div>
         
         <div class="flex justify-center items-center space-x-6 text-sm">
-            <a class="flex items-center text-primary dark:text-accent hover:underline cursor-pointer" @click="showSubmitModal = true">
+            <a class="flex items-center text-primary dark:text-accent hover:underline cursor-pointer" @click="handleSubmitClick">
                 提交工具 <span class="ml-1">👉</span>
             </a>
             <span class="text-gray-300 dark:text-gray-600">|</span>
@@ -187,6 +187,33 @@
                     <label class="block text-sm font-medium dark:text-gray-300">描述</label>
                     <textarea v-model="submitForm.description" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="简短描述..."></textarea>
                 </div>
+                 <div>
+                    <label class="block text-sm font-medium dark:text-gray-300 mb-1.5">验证码 <span class="text-red-500">*</span></label>
+                    <div class="flex gap-2">
+                        <div class="flex-1 flex items-center gap-2">
+                            <div class="flex-shrink-0 px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-200 font-mono text-center min-w-[100px]">
+                                {{ submitCaptchaQuestion }}
+                            </div>
+                            <input 
+                                v-model="submitCaptcha.userAnswer.value" 
+                                type="number" 
+                                class="flex-1 border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" 
+                                placeholder="答案"
+                                required 
+                            />
+                        </div>
+                        <button 
+                            type="button"
+                            @click="submitCaptcha.generateCaptcha()"
+                            class="px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                            title="刷新验证码"
+                        >
+                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
                 <div class="flex justify-end space-x-2 mt-6">
                     <button type="button" @click="showSubmitModal = false" class="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400">取消</button>
                     <button type="submit" class="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover">提交</button>
@@ -266,6 +293,18 @@ const sortBy = ref('default');
 const quickFilter = ref('all');
 const showSubmitModal = ref(false);
 const submitForm = ref({ name: '', url: '', category_id: null, description: '' });
+
+// 提交工具验证码
+const submitCaptcha = useMathCaptcha();
+const submitCaptchaQuestion = computed(() => submitCaptcha.captchaQuestion.value);
+
+const handleSubmitClick = () => {
+    if (settings.value.submit_enabled === 'false') {
+        notification.warning('提交工具功能已关闭');
+        return;
+    }
+    showSubmitModal.value = true;
+}
 
 // 下拉框状态
 const showSortDropdown = ref(false);
@@ -376,13 +415,22 @@ const getSortLabel = (sort) => {
 };
 
 const handleSubmit = async () => {
+    // 验证验证码
+    if (!submitCaptcha.validateAnswer()) {
+        notification.error('验证码错误，请重新计算');
+        submitCaptcha.generateCaptcha();
+        return;
+    }
+
     try {
         await dataStore.submitItem(submitForm.value);
         notification.success('提交成功！等待管理员审核。');
         showSubmitModal.value = false;
         submitForm.value = { name: '', url: '', category_id: null, description: '' };
+        submitCaptcha.generateCaptcha();
     } catch (e) {
         notification.error('提交失败: ' + e.message);
+        submitCaptcha.generateCaptcha();
     }
 }
 
