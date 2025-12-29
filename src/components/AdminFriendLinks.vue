@@ -11,6 +11,7 @@
         <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
             <thead class="bg-gray-50 dark:bg-gray-700 text-xs uppercase text-gray-700 dark:text-gray-300">
                 <tr>
+                    <th scope="col" class="px-4 py-3 w-16">图标</th>
                     <th scope="col" class="px-6 py-3">名称</th>
                     <th scope="col" class="px-6 py-3">链接</th>
                     <th scope="col" class="px-6 py-3">排序</th>
@@ -19,6 +20,12 @@
             </thead>
             <tbody>
                 <tr v-for="link in links" :key="link.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <td class="px-4 py-4">
+                        <div class="w-8 h-8 rounded flex items-center justify-center overflow-hidden bg-gray-100 dark:bg-gray-700">
+                            <img v-if="getLinkIconType(link) === 'image'" :src="getLinkIconSrc(link)" alt="" class="w-full h-full object-cover" />
+                            <i v-else :class="getLinkIconSrc(link)" class="text-lg text-gray-600 dark:text-gray-300"></i>
+                        </div>
+                    </td>
                     <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ link.name }}</td>
                     <td class="px-6 py-4 truncate max-w-xs">{{ link.url }}</td>
                     <td class="px-6 py-4">{{ link.sort_order }}</td>
@@ -145,6 +152,27 @@ const autoFetchIcon = (service) => {
     } catch {
         notification.error('链接格式不正确');
     }
+};
+
+// 获取友链图标类型
+const getLinkIconType = (link) => {
+    if (!link.icon) return 'image'; // 默认使用自动获取图片
+    if (link.icon.startsWith('http') || link.icon.startsWith('/')) return 'image';
+    return 'class'; // FontAwesome 类名
+};
+
+// 获取友链图标源
+const getLinkIconSrc = (link) => {
+    if (!link.icon) {
+        // 从 URL 提取域名，使用 Unavatar 获取图标
+        try {
+            const domain = new URL(link.url).hostname;
+            return `https://unavatar.io/${domain}?fallback=https://icon.horse/icon/${domain}`;
+        } catch {
+            return 'fas fa-link';
+        }
+    }
+    return link.icon; // 返回 URL 或 FontAwesome 类名
 };
 
 onMounted(async () => {
