@@ -1,5 +1,5 @@
 export async function onRequestPut(context) {
-    const db = context.env.DB;
+    const db = context.env.MINAV_DB;
     const id = context.params.id;
     const { category_id, name, description, url, icon, status, sort_order } = await context.request.json();
 
@@ -11,7 +11,7 @@ export async function onRequestPut(context) {
 }
 
 export async function onRequestDelete(context) {
-    const db = context.env.DB;
+    const db = context.env.MINAV_DB;
     const id = context.params.id;
 
     const { success } = await db.prepare('DELETE FROM items WHERE id = ?').bind(id).run();

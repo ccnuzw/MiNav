@@ -1,11 +1,11 @@
 export async function onRequestGet(context) {
-    const db = context.env.DB;
+    const db = context.env.MINAV_DB;
     const { results } = await db.prepare('SELECT * FROM categories ORDER BY sort_order ASC').all();
     return new Response(JSON.stringify(results), { headers: { 'Content-Type': 'application/json' } });
 }
 
 export async function onRequestPost(context) {
-    const db = context.env.DB;
+    const db = context.env.MINAV_DB;
     try {
         const { name, icon, sort_order } = await context.request.json();
 

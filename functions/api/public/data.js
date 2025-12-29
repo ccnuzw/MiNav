@@ -1,5 +1,5 @@
 export async function onRequestGet(context) {
-    const db = context.env.DB;
+    const db = context.env.MINAV_DB;
 
     try {
         // Fetch categories

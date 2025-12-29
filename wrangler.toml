@@ -3,10 +3,10 @@ compatibility_date = "2024-01-01"
 pages_build_output_dir = "./dist"
 
 [[d1_databases]]
-binding = "DB"
+binding = "MINAV_DB"
 database_name = "nav_db"
 database_id = "NAV_DB_ID_PLACEHOLDER"
 
 [[kv_namespaces]]
-binding = "KV"
+binding = "MINAV_KV"
 id = "NAV_KV_ID_PLACEHOLDER"

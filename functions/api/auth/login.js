@@ -27,7 +27,7 @@ export async function onRequestPost(context) {
         // Create Session
         const token = crypto.randomUUID();
         // Store in KV: 24 hours expiration
-        await context.env.KV.put(`session:${token}`, user.id, { expirationTtl: 86400 });
+        await context.env.MINAV_KV.put(`session:${token}`, user.id, { expirationTtl: 86400 });
 
         return new Response(JSON.stringify({ token, user: { username: user.username } }), {
             headers: { 'Content-Type': 'application/json' }

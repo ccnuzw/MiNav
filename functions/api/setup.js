@@ -1,5 +1,5 @@
 export async function onRequestGet(context) {
-    const db = context.env.DB;
+    const db = context.env.MINAV_DB;
 
     // Check if any user exists
     const { count } = await db.prepare('SELECT COUNT(*) as count FROM users').first();

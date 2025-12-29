@@ -8,7 +8,7 @@ export async function onRequestPost({ request, env }) {
 
         // Rate limiting could go here (using KV or IP check) - Skipping for MVP
 
-        const { success } = await env.DB.prepare(
+        const { success } = await env.MINAV_DB.prepare(
             "INSERT INTO items (name, url, description, category_id, icon, status) VALUES (?, ?, ?, ?, ?, 'pending')"
         ).bind(name, url, description, category_id, icon).run();
 

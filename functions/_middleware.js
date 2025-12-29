@@ -19,7 +19,7 @@ export async function onRequest(context) {
 
     // Verify token in KV
     // Key format: session:<token> -> user_id
-    const userId = await context.env.KV.get(`session:${token}`);
+    const userId = await context.env.MINAV_KV.get(`session:${token}`);
 
     if (!userId) {
         return new Response(JSON.stringify({ error: 'Invalid or expired token' }), {

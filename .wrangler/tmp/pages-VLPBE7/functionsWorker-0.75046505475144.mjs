@@ -1,7 +1,7 @@
 var __defProp = Object.defineProperty;
 var __name = (target, value) => __defProp(target, "name", { value, configurable: true });
 
-// ../.wrangler/tmp/bundle-NzgmED/checked-fetch.js
+// ../.wrangler/tmp/bundle-s7uG6n/checked-fetch.js
 var urls = /* @__PURE__ */ new Set();
 function checkURL(request, init) {
   const url = request instanceof URL ? request : new URL(
@@ -29,7 +29,7 @@ globalThis.fetch = new Proxy(globalThis.fetch, {
 
 // api/admin/categories/[id].js
 async function onRequestPut(context) {
-  const db = context.env.DB;
+  const db = context.env.MINAV_DB;
   const id = context.params.id;
   const { name, icon, sort_order } = await context.request.json();
   const { success } = await db.prepare(
@@ -39,7 +39,7 @@ async function onRequestPut(context) {
 }
 __name(onRequestPut, "onRequestPut");
 async function onRequestDelete(context) {
-  const db = context.env.DB;
+  const db = context.env.MINAV_DB;
   const id = context.params.id;
   const { success } = await db.prepare("DELETE FROM categories WHERE id = ?").bind(id).run();
   return new Response(JSON.stringify({ success }), { headers: { "Content-Type": "application/json" } });
@@ -48,7 +48,7 @@ __name(onRequestDelete, "onRequestDelete");
 
 // api/admin/items/[id].js
 async function onRequestPut2(context) {
-  const db = context.env.DB;
+  const db = context.env.MINAV_DB;
   const id = context.params.id;
   const { category_id, name, description, url, icon, status, sort_order } = await context.request.json();
   const { success } = await db.prepare(
@@ -58,7 +58,7 @@ async function onRequestPut2(context) {
 }
 __name(onRequestPut2, "onRequestPut");
 async function onRequestDelete2(context) {
-  const db = context.env.DB;
+  const db = context.env.MINAV_DB;
   const id = context.params.id;
   const { success } = await db.prepare("DELETE FROM items WHERE id = ?").bind(id).run();
   return new Response(JSON.stringify({ success }), { headers: { "Content-Type": "application/json" } });
@@ -67,13 +67,13 @@ __name(onRequestDelete2, "onRequestDelete");
 
 // api/admin/categories.js
 async function onRequestGet(context) {
-  const db = context.env.DB;
+  const db = context.env.MINAV_DB;
   const { results } = await db.prepare("SELECT * FROM categories ORDER BY sort_order ASC").all();
   return new Response(JSON.stringify(results), { headers: { "Content-Type": "application/json" } });
 }
 __name(onRequestGet, "onRequestGet");
 async function onRequestPost(context) {
-  const db = context.env.DB;
+  const db = context.env.MINAV_DB;
   try {
     const { name, icon, sort_order } = await context.request.json();
     const { success, meta } = await db.prepare(
@@ -88,13 +88,13 @@ __name(onRequestPost, "onRequestPost");
 
 // api/admin/items.js
 async function onRequestGet2(context) {
-  const db = context.env.DB;
+  const db = context.env.MINAV_DB;
   const { results } = await db.prepare("SELECT * FROM items ORDER BY created_at DESC").all();
   return new Response(JSON.stringify(results), { headers: { "Content-Type": "application/json" } });
 }
 __name(onRequestGet2, "onRequestGet");
 async function onRequestPost2(context) {
-  const db = context.env.DB;
+  const db = context.env.MINAV_DB;
   try {
     const { category_id, name, description, url, icon, status, sort_order } = await context.request.json();
     const { success, meta } = await db.prepare(
@@ -125,7 +125,7 @@ async function onRequestPost3(context) {
       return new Response(JSON.stringify({ error: "Invalid credentials" }), { status: 401 });
     }
     const token = crypto.randomUUID();
-    await context.env.KV.put(`session:${token}`, user.id, { expirationTtl: 86400 });
+    await context.env.MINAV_KV.put(`session:${token}`, user.id, { expirationTtl: 86400 });
     return new Response(JSON.stringify({ token, user: { username: user.username } }), {
       headers: { "Content-Type": "application/json" }
     });
@@ -137,7 +137,7 @@ __name(onRequestPost3, "onRequestPost");
 
 // api/public/data.js
 async function onRequestGet3(context) {
-  const db = context.env.DB;
+  const db = context.env.MINAV_DB;
   try {
     const { results: categories } = await db.prepare(
       "SELECT * FROM categories ORDER BY sort_order ASC"
@@ -165,7 +165,7 @@ async function onRequestPost4({ request, env }) {
     if (!name || !url || !category_id) {
       return new Response(JSON.stringify({ error: "Missing required fields" }), { status: 400 });
     }
-    const { success } = await env.DB.prepare(
+    const { success } = await env.MINAV_DB.prepare(
       "INSERT INTO items (name, url, description, category_id, icon, status) VALUES (?, ?, ?, ?, ?, 'pending')"
     ).bind(name, url, description, category_id, icon).run();
     if (!success) {
@@ -182,7 +182,7 @@ __name(onRequestPost4, "onRequestPost");
 
 // api/setup.js
 async function onRequestGet4(context) {
-  const db = context.env.DB;
+  const db = context.env.MINAV_DB;
   const { count } = await db.prepare("SELECT COUNT(*) as count FROM users").first();
   if (count > 0) {
     return new Response("Setup already completed", { status: 400 });
@@ -209,7 +209,7 @@ async function onRequest(context) {
       headers: { "Content-Type": "application/json" }
     });
   }
-  const userId = await context.env.KV.get(`session:${token}`);
+  const userId = await context.env.MINAV_KV.get(`session:${token}`);
   if (!userId) {
     return new Response(JSON.stringify({ error: "Invalid or expired token" }), {
       status: 401,
@@ -221,7 +221,7 @@ async function onRequest(context) {
 }
 __name(onRequest, "onRequest");
 
-// ../.wrangler/tmp/pages-pUZYVo/functionsRoutes-0.7253609450707414.mjs
+// ../.wrangler/tmp/pages-VLPBE7/functionsRoutes-0.22311309914271638.mjs
 var routes = [
   {
     routePath: "/api/admin/categories/:id",
@@ -803,7 +803,7 @@ var jsonError = /* @__PURE__ */ __name(async (request, env, _ctx, middlewareCtx)
 }, "jsonError");
 var middleware_miniflare3_json_error_default = jsonError;
 
-// ../.wrangler/tmp/bundle-NzgmED/middleware-insertion-facade.js
+// ../.wrangler/tmp/bundle-s7uG6n/middleware-insertion-facade.js
 var __INTERNAL_WRANGLER_MIDDLEWARE__ = [
   middleware_ensure_req_body_drained_default,
   middleware_miniflare3_json_error_default
@@ -835,7 +835,7 @@ function __facade_invoke__(request, env, ctx, dispatch, finalMiddleware) {
 }
 __name(__facade_invoke__, "__facade_invoke__");
 
-// ../.wrangler/tmp/bundle-NzgmED/middleware-loader.entry.ts
+// ../.wrangler/tmp/bundle-s7uG6n/middleware-loader.entry.ts
 var __Facade_ScheduledController__ = class ___Facade_ScheduledController__ {
   constructor(scheduledTime, cron, noRetry) {
     this.scheduledTime = scheduledTime;
@@ -935,4 +935,4 @@ export {
   __INTERNAL_WRANGLER_MIDDLEWARE__,
   middleware_loader_entry_default as default
 };
-//# sourceMappingURL=functionsWorker-0.41205112620313766.mjs.map
+//# sourceMappingURL=functionsWorker-0.75046505475144.mjs.map
