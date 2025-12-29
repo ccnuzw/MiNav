@@ -7,26 +7,41 @@
           {{ unreadCount }} 条未读
         </span>
       </div>
-      <!-- 状态筛选 -->
-      <div class="flex gap-2">
-        <button 
-          @click="statusFilter = 'all'" 
-          :class="statusFilter === 'all' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
-          class="px-3 py-1.5 rounded text-sm font-medium transition">
-          全部
-        </button>
-        <button 
-          @click="statusFilter = 'pending'" 
-          :class="statusFilter === 'pending' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
-          class="px-3 py-1.5 rounded text-sm font-medium transition">
-          未读
-        </button>
-        <button 
-          @click="statusFilter = 'read'" 
-          :class="statusFilter === 'read' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
-          class="px-3 py-1.5 rounded text-sm font-medium transition">
-          已读
-        </button>
+      <div class="flex items-center gap-4">
+        <!-- 批量操作区 -->
+        <div class="flex items-center gap-4 border-r pr-4 mr-2 border-gray-200 dark:border-gray-700">
+            <label v-if="feedbacks.length > 0" class="flex items-center gap-2 cursor-pointer select-none text-sm text-gray-600 dark:text-gray-300 hover:text-primary transition">
+                <input type="checkbox" :checked="isAllSelected" @change="toggleSelectAll" class="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4" />
+                全选
+            </label>
+            <button 
+            v-if="selectedFeedbacks.length > 0"
+            @click="handleBulkDelete"
+            class="px-3 py-1.5 text-sm bg-red-500 hover:bg-red-600 text-white rounded transition flex items-center gap-1 shadow-sm">
+            <i class="fas fa-trash-alt"></i> 删除 ({{ selectedFeedbacks.length }})
+            </button>
+        </div>
+        <!-- 状态筛选 -->
+        <div class="flex gap-2">
+            <button 
+            @click="statusFilter = 'all'" 
+            :class="statusFilter === 'all' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+            class="px-3 py-1.5 rounded text-sm font-medium transition">
+            全部
+            </button>
+            <button 
+            @click="statusFilter = 'pending'" 
+            :class="statusFilter === 'pending' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+            class="px-3 py-1.5 rounded text-sm font-medium transition">
+            未读
+            </button>
+            <button 
+            @click="statusFilter = 'read'" 
+            :class="statusFilter === 'read' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
+            class="px-3 py-1.5 rounded text-sm font-medium transition">
+            已读
+            </button>
+        </div>
       </div>
     </div>
 
@@ -45,9 +60,13 @@
         v-for="feedback in feedbacks" 
         :key="feedback.id" 
         class="border dark:border-dark-border rounded-lg p-4 transition hover:shadow-md"
-        :class="feedback.status === 'pending' ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-dark-card'">
+        :class="[
+            feedback.status === 'pending' ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-dark-card',
+            selectedFeedbacks.includes(feedback.id) ? 'ring-2 ring-primary border-primary' : ''
+        ]">
         <div class="flex justify-between items-start mb-2">
           <div class="flex items-center gap-3">
+             <input type="checkbox" :value="feedback.id" v-model="selectedFeedbacks" class="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4" @click.stop />
             <span 
               class="px-2 py-0.5 text-xs font-medium rounded"
               :class="feedback.status === 'pending' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'">
@@ -118,9 +137,26 @@ const statusFilter = ref('all')
 const currentPage = ref(1)
 const totalCount = ref(0)
 const unreadCount = ref(0)
+const selectedFeedbacks = ref([])
 const limit = 10
 
 const totalPages = computed(() => Math.ceil(totalCount.value / limit))
+
+const isAllSelected = computed(() => {
+    return feedbacks.value.length > 0 && feedbacks.value.every(f => selectedFeedbacks.value.includes(f.id))
+})
+
+const toggleSelectAll = () => {
+    if (isAllSelected.value) {
+        // 取消全选（只取消当前页）
+        selectedFeedbacks.value = selectedFeedbacks.value.filter(id => !feedbacks.value.find(f => f.id === id))
+    } else {
+        // 全选当前页
+        const currentIds = feedbacks.value.map(f => f.id)
+        // 合并并去重
+        selectedFeedbacks.value = [...new Set([...selectedFeedbacks.value, ...currentIds])]
+    }
+}
 
 const fetchData = async () => {
   loading.value = true
@@ -134,7 +170,35 @@ const fetchData = async () => {
     notification.error('获取反馈失败: ' + e.message)
   } finally {
     loading.value = false
+    // 翻页或刷新数据后，清理不在当前列表中的选中项（可选，根据需求决定是否保留跨页选择。这里为了简单起见保留选中状态，不做特殊清理）
   }
+}
+
+const handleBulkDelete = async () => {
+    if (selectedFeedbacks.value.length === 0) return
+
+    const confirmed = await notification.confirm({
+        title: '批量删除确认',
+        message: `确定要删除选中的 ${selectedFeedbacks.value.length} 条反馈吗？此操作不可恢复。`,
+        type: 'danger',
+        confirmText: '确认删除',
+        cancelText: '取消'
+    })
+
+    if (!confirmed) return
+
+    try {
+        // 并发删除
+        const deletePromises = selectedFeedbacks.value.map(id => dataStore.deleteFeedback(authStore.token, id))
+        await Promise.all(deletePromises)
+        
+        notification.success('批量删除成功')
+        selectedFeedbacks.value = [] // 清空选择
+        fetchData() // 刷新列表
+    } catch (e) {
+        notification.error('批量删除过程中发生错误: ' + e.message)
+        fetchData() // 刷新列表以显示最新状态
+    }
 }
 
 const markAsRead = async (id) => {
