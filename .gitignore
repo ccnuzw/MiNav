@@ -12,10 +12,13 @@ dist
 dist-ssr
 *.local
 
+.vscode/
+.wrangler/
+
 legacy/
 # Editor directories and files
-.vscode/*
-!.vscode/extensions.json
+# Editor directories and files
+.vscode
 .idea
 .DS_Store
 *.suo
@@ -24,4 +27,5 @@ legacy/
 *.sln
 *.sw?
 
+# Security / Local config
 wrangler.toml
