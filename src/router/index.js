@@ -28,8 +28,6 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    // SEO Title
-    document.title = to.meta.title ? `${to.meta.title} - Awesome Cloudflare` : 'Awesome Cloudflare - Cloudflare Project Explorer';
 
     const authStore = useAuthStore()
     if (to.meta.requiresAuth && !authStore.isAuthenticated) {
