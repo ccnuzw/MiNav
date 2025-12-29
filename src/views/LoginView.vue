@@ -126,7 +126,7 @@ const handleLogin = async () => {
         notification.success('登录成功！');
         router.push('/admin');
     } catch (e) {
-        notification.error('登录失败，请检查用户名和密码');
+        notification.error(e.message || '登录失败，请检查用户名和密码');
     } finally {
         loading.value = false;
     }

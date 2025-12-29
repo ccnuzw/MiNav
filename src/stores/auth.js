@@ -25,27 +25,24 @@ export const useAuthStore = defineStore('auth', () => {
     }
 
     async function login(username, password) {
-        try {
-            const res = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ username, password })
-            })
+        const res = await fetch('/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username, password })
+        })
 
-            if (!res.ok) {
-                throw new Error('Login failed')
-            }
-
-            const data = await res.json()
-            setToken(data.token)
-            setRequirePasswordChange(data.requirePasswordChange || false)
-
-            return data
-        } catch (e) {
-            throw e
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}))
+            throw new Error(data.error || '登录失败')
         }
+
+        const data = await res.json()
+        setToken(data.token)
+        setRequirePasswordChange(data.requirePasswordChange || false)
+
+        return data
     }
 
     async function changePassword(oldPassword, newPassword) {

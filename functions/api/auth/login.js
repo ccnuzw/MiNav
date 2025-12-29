@@ -1,5 +1,26 @@
 export async function onRequestPost(context) {
     try {
+        const kv = context.env.MINAV_KV;
+
+        // 获取客户端IP
+        const clientIP = context.request.headers.get('CF-Connecting-IP') ||
+            context.request.headers.get('X-Forwarded-For')?.split(',')[0] ||
+            'unknown';
+
+        // 速率限制检查 - 5分钟内最多允许5次失败尝试
+        const rateLimitKey = `login_attempts:${clientIP}`;
+        const attempts = await kv.get(rateLimitKey);
+        const attemptCount = attempts ? parseInt(attempts) : 0;
+
+        if (attemptCount >= 5) {
+            return new Response(JSON.stringify({
+                error: '登录尝试次数过多，请5分钟后再试'
+            }), {
+                status: 429,
+                headers: { 'Content-Type': 'application/json' }
+            });
+        }
+
         const { username, password } = await context.request.json();
 
         // In a real production app, use proper password hashing (Argon2, bcrypt).
@@ -17,6 +38,8 @@ export async function onRequestPost(context) {
         const user = await db.prepare('SELECT * FROM users WHERE username = ?').bind(username).first();
 
         if (!user) {
+            // 登录失败，增加尝试次数
+            await kv.put(rateLimitKey, String(attemptCount + 1), { expirationTtl: 300 });
             return new Response(JSON.stringify({ error: '用户名或密码错误' }), { status: 401 });
         }
 
@@ -28,13 +51,18 @@ export async function onRequestPost(context) {
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
         if (hashHex !== user.password_hash) {
+            // 登录失败，增加尝试次数
+            await kv.put(rateLimitKey, String(attemptCount + 1), { expirationTtl: 300 });
             return new Response(JSON.stringify({ error: '用户名或密码错误' }), { status: 401 });
         }
+
+        // 登录成功，清除尝试计数
+        await kv.delete(rateLimitKey);
 
         // Create Session
         const token = crypto.randomUUID();
         // Store in KV: 24 hours expiration
-        await context.env.MINAV_KV.put(`session:${token}`, user.id, { expirationTtl: 86400 });
+        await kv.put(`session:${token}`, user.id, { expirationTtl: 86400 });
 
         // Check if user is using default password (SHA-256 hash of 'admin')
         const defaultPasswordHash = '8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918';
