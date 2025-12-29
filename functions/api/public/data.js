@@ -15,15 +15,12 @@ export async function onRequestGet(context) {
         // Fetch all item tags with tag info
         let itemsWithTags = items;
         if (items.length > 0) {
-            const itemIds = items.map(item => item.id);
-            const placeholders = itemIds.map(() => '?').join(',');
-
+            // Fetch all tags (avoiding IN clause limit for many items)
             const { results: tagResults } = await db.prepare(`
                 SELECT it.item_id, t.id, t.name, t.color 
                 FROM item_tags it 
-                JOIN tags t ON it.tag_id = t.id 
-                WHERE it.item_id IN (${placeholders})
-            `).bind(...itemIds).all();
+                JOIN tags t ON it.tag_id = t.id
+            `).all();
 
             // Group tags by item_id
             const tagsByItem = {};
@@ -48,6 +45,7 @@ export async function onRequestGet(context) {
             }
         });
     } catch (err) {
+        console.error('API Error:', err);
         return new Response(JSON.stringify({ error: err.message }), { status: 500 });
     }
 }

@@ -7,6 +7,9 @@
                 <option value="all">所有分类</option>
                 <option v-for="cat in categories.filter(c => c.name !== '全部项目')" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
             </select>
+            <button @click="showIconMatchModal = true" class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition whitespace-nowrap text-sm">
+                <i class="fas fa-magic mr-1"></i>匹配图标
+            </button>
             <button @click="showAddModal = true" class="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover transition whitespace-nowrap">
                 添加项目
             </button>
@@ -36,8 +39,8 @@
                             <i v-else :class="getItemIconSrc(item)" class="text-lg text-gray-600 dark:text-gray-300"></i>
                         </div>
                     </td>
-                    <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ item.name }}</td>
-                    <td class="px-6 py-4 truncate max-w-xs">{{ item.url }}</td>
+                    <td class="px-6 py-4 font-medium text-gray-900 dark:text-white truncate max-w-[150px]" :title="item.name">{{ item.name }}</td>
+                    <td class="px-6 py-4 truncate max-w-xs text-xs text-gray-500" :title="item.url">{{ item.url }}</td>
                     <td class="px-6 py-4">{{ getCategoryName(item.category_id) }}</td>
                     <td class="px-6 py-4">
                         <div class="flex flex-wrap gap-1">
@@ -209,6 +212,14 @@
             </form>
         </div>
     </div>
+
+    <!-- Icon Match Modal -->
+    <IconMatchModal 
+        v-if="showIconMatchModal" 
+        :show="showIconMatchModal" 
+        @close="showIconMatchModal = false"
+        @refresh="loadItems"
+    />
   </div>
 </template>
 
@@ -217,6 +228,7 @@ import { ref, computed, onMounted, watch } from 'vue';
 import { useDataStore } from '../stores/data';
 import { useAuthStore } from '../stores/auth';
 import { useNotificationStore } from '../stores/notification';
+import IconMatchModal from './IconMatchModal.vue';
 
 const props = defineProps(['categories']);
 const items = ref([]);
@@ -241,6 +253,7 @@ const getItemIconSrc = (item) => {
 };
 
 const showAddModal = ref(false);
+const showIconMatchModal = ref(false);
 const editingItem = ref(null);
 const form = ref({ name: '', url: '', category_id: null, description: '', icon: '', status: 'active', sort_order: 0, tag_ids: [] });
 const filterCategoryId = ref('all');

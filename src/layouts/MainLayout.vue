@@ -96,7 +96,7 @@
                     </a>
                 </div>
             </div>
-            <p>© 2023 Awesome Cloudflare. All rights reserved.</p>
+            <p>© 2026 MiNav. All rights reserved.</p>
         </div>
     </footer>
   </div>
