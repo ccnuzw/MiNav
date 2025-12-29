@@ -94,6 +94,9 @@
             </div>
         </div>
     </div>
+
+    <!-- Friend Links Section -->
+
   </MainLayout>
 
 

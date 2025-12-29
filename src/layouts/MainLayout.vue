@@ -97,6 +97,18 @@
     <!-- Footer -->
     <footer class="bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border mt-16 pt-16 pb-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500 dark:text-gray-400">
+            <!-- Friend Links Section -->
+            <div v-if="friendLinks && friendLinks.length > 0" class="mb-12 border-b border-gray-200 dark:border-dark-border pb-12">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white mb-6 flex items-center justify-center">
+                    <i class="fas fa-link mr-2 text-primary dark:text-accent"></i> 友情链接
+                </h3>
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-6 gap-y-4 max-w-5xl mx-auto">
+                    <a v-for="link in friendLinks" :key="link.id" :href="link.url" target="_blank" class="flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition group">
+                         <div class="font-medium text-gray-600 dark:text-gray-300 group-hover:text-primary dark:group-hover:text-accent transition truncate w-full text-center">{{ link.name }}</div>
+                         <div v-if="link.description" class="text-xs text-gray-400 dark:text-gray-500 mt-1 truncate w-full text-center opacity-0 group-hover:opacity-100 transition duration-300">{{ link.description }}</div>
+                    </a>
+                </div>
+            </div>
             <p>© 2023 Awesome Cloudflare. All rights reserved.</p>
         </div>
     </footer>
@@ -109,7 +121,7 @@ import { useDataStore } from '../stores/data';
 import { storeToRefs } from 'pinia';
 
 const dataStore = useDataStore();
-const { categories, categoryCounts, items, filters, settings } = storeToRefs(dataStore);
+const { categories, categoryCounts, items, filters, settings, friendLinks } = storeToRefs(dataStore);
 
 const totalItemsCount = computed(() => items.value.length);
 
