@@ -64,20 +64,20 @@
             feedback.status === 'pending' ? 'bg-blue-50/50 dark:bg-blue-900/10 border-blue-200 dark:border-blue-800' : 'bg-white dark:bg-dark-card',
             selectedFeedbacks.includes(feedback.id) ? 'ring-2 ring-primary border-primary' : ''
         ]">
-        <div class="flex justify-between items-start mb-2">
-          <div class="flex items-center gap-3">
-             <input type="checkbox" :value="feedback.id" v-model="selectedFeedbacks" class="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4" @click.stop />
+        <div class="flex flex-col sm:flex-row justify-between items-start mb-2 gap-2">
+          <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+             <input type="checkbox" :value="feedback.id" v-model="selectedFeedbacks" class="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4 shrink-0" @click.stop />
             <span 
-              class="px-2 py-0.5 text-xs font-medium rounded"
+              class="px-2 py-0.5 text-xs font-medium rounded shrink-0"
               :class="feedback.status === 'pending' ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400' : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'">
               {{ feedback.status === 'pending' ? '未读' : '已读' }}
             </span>
-            <span v-if="feedback.email" class="text-sm text-gray-600 dark:text-gray-400">
+            <span v-if="feedback.email" class="text-sm text-gray-600 dark:text-gray-400 break-all">
               <i class="fas fa-envelope mr-1"></i>{{ feedback.email }}
             </span>
-            <span v-else class="text-sm text-gray-400 dark:text-gray-500 italic">未提供邮箱</span>
+            <span v-else class="text-sm text-gray-400 dark:text-gray-500 italic shrink-0">未提供邮箱</span>
           </div>
-          <span class="text-xs text-gray-400">{{ formatDate(feedback.created_at) }}</span>
+          <span class="text-xs text-gray-400 shrink-0 self-end sm:self-auto">{{ formatDate(feedback.created_at) }}</span>
         </div>
         <p class="text-gray-700 dark:text-gray-300 mb-3 whitespace-pre-wrap">{{ feedback.content }}</p>
         <div class="flex gap-2">
