@@ -31,16 +31,34 @@
 
     <!-- Control Bar -->
     <div class="flex flex-col md:flex-row justify-between items-center mb-10 space-y-4 md:space-y-0">
-        <div class="w-full md:w-auto relative group">
-            <button class="w-full md:w-48 px-4 py-2 bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-lg flex justify-between items-center text-gray-700 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 transition">
-                <span>{{ sortBy === 'default' ? '默认排序' : (sortBy === 'newest' ? '最新添加' : '热门排行') }}</span>
-                <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+        <div class="w-full md:w-auto relative" ref="sortDropdownRef">
+            <button @click="showSortDropdown = !showSortDropdown" class="w-full md:w-48 px-4 py-2 bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-lg flex justify-between items-center text-gray-700 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 transition">
+                <span>{{ getSortLabel(sortBy) }}</span>
+                <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform" :class="showSortDropdown ? 'rotate-180' : ''"></i>
             </button>
             <!-- Dropdown -->
-            <div class="absolute top-full left-0 w-full mt-2 bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-lg shadow-lg hidden group-hover:block z-20">
-                <button @click="sortBy = 'default'" class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm dark:text-gray-200">默认排序</button>
-                <button @click="sortBy = 'newest'" class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm dark:text-gray-200">最新添加</button>
-                <!-- <button @click="sortBy = 'hot'" class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm dark:text-gray-200">热门排行</button> -->
+            <div v-show="showSortDropdown" class="absolute top-full left-0 w-full mt-1 bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-lg shadow-lg z-20">
+                <button @click="selectSort('default')" 
+                    class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm dark:text-gray-200 flex items-center rounded-t-lg"
+                    :class="sortBy === 'default' ? 'bg-primary/10 text-primary dark:bg-accent/10 dark:text-accent' : ''">
+                    <i class="fas fa-layer-group mr-2 text-xs"></i>
+                    默认排序
+                    <i v-if="sortBy === 'default'" class="fas fa-check ml-auto text-xs"></i>
+                </button>
+                <button @click="selectSort('newest')" 
+                    class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm dark:text-gray-200 flex items-center"
+                    :class="sortBy === 'newest' ? 'bg-primary/10 text-primary dark:bg-accent/10 dark:text-accent' : ''">
+                    <i class="fas fa-clock mr-2 text-xs"></i>
+                    最新添加
+                    <i v-if="sortBy === 'newest'" class="fas fa-check ml-auto text-xs"></i>
+                </button>
+                <button @click="selectSort('name')" 
+                    class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm dark:text-gray-200 flex items-center rounded-b-lg"
+                    :class="sortBy === 'name' ? 'bg-primary/10 text-primary dark:bg-accent/10 dark:text-accent' : ''">
+                    <i class="fas fa-sort-alpha-down mr-2 text-xs"></i>
+                    名称排序
+                    <i v-if="sortBy === 'name'" class="fas fa-check ml-auto text-xs"></i>
+                </button>
             </div>
         </div>
         
@@ -56,12 +74,34 @@
             </button>
         </div>
 
-        <div class="w-full md:w-auto relative">
-             <!-- Placeholder for 'Selection Tools' or other actions -->
-            <button class="w-full md:w-48 px-4 py-2 bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-lg flex justify-between items-center text-gray-700 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 transition">
-                <span>甄选工具</span>
-                <i class="fas fa-chevron-down text-xs text-gray-400"></i>
+        <div class="w-full md:w-auto relative" ref="categoryDropdownRef">
+             <!-- 分类筛选下拉框 -->
+            <button @click="showCategoryDropdown = !showCategoryDropdown" class="w-full md:w-48 px-4 py-2 bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-lg flex justify-between items-center text-gray-700 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 transition">
+                <span>{{ quickFilter === 'all' ? '全部分类' : getCategoryName(quickFilter) }}</span>
+                <i class="fas fa-chevron-down text-xs text-gray-400 transition-transform" :class="showCategoryDropdown ? 'rotate-180' : ''"></i>
             </button>
+            <!-- Dropdown -->
+            <div v-show="showCategoryDropdown" class="absolute top-full right-0 w-56 mt-1 bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-lg shadow-lg z-20 max-h-80 overflow-y-auto">
+                <button @click="selectCategory('all')" 
+                    class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm dark:text-gray-200 flex items-center rounded-t-lg"
+                    :class="quickFilter === 'all' ? 'bg-primary/10 text-primary dark:bg-accent/10 dark:text-accent' : ''">
+                    <span class="material-symbols-outlined text-base mr-2">apps</span>
+                    全部分类
+                    <i v-if="quickFilter === 'all'" class="fas fa-check ml-auto text-xs"></i>
+                </button>
+                <div class="border-t border-gray-100 dark:border-dark-border my-1"></div>
+                <button v-for="(cat, index) in categories.filter(c => c.name !== '全部项目')" :key="cat.id" 
+                    @click="selectCategory(cat.id)" 
+                    class="w-full text-left px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-800 text-sm dark:text-gray-200 flex items-center"
+                    :class="[
+                        quickFilter === cat.id ? 'bg-primary/10 text-primary dark:bg-accent/10 dark:text-accent' : '',
+                        index === categories.filter(c => c.name !== '全部项目').length - 1 ? 'rounded-b-lg' : ''
+                    ]">
+                    <span class="material-symbols-outlined text-base mr-2">{{ cat.icon || 'folder' }}</span>
+                    {{ cat.name }}
+                    <i v-if="quickFilter === cat.id" class="fas fa-check ml-auto text-xs"></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -160,7 +200,7 @@
 
 </template>
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import MainLayout from '../layouts/MainLayout.vue';
 import { useDataStore } from '../stores/data';
 import { storeToRefs } from 'pinia';
@@ -173,9 +213,42 @@ const quickFilter = ref('all');
 const showSubmitModal = ref(false);
 const submitForm = ref({ name: '', url: '', category_id: null, description: '' });
 
+// 下拉框状态
+const showSortDropdown = ref(false);
+const showCategoryDropdown = ref(false);
+const sortDropdownRef = ref(null);
+const categoryDropdownRef = ref(null);
+
+// 选择排序方式
+const selectSort = (value) => {
+    sortBy.value = value;
+    showSortDropdown.value = false;
+};
+
+// 选择分类
+const selectCategory = (value) => {
+    quickFilter.value = value;
+    showCategoryDropdown.value = false;
+};
+
+// 点击外部关闭下拉框
+const handleClickOutside = (event) => {
+    if (sortDropdownRef.value && !sortDropdownRef.value.contains(event.target)) {
+        showSortDropdown.value = false;
+    }
+    if (categoryDropdownRef.value && !categoryDropdownRef.value.contains(event.target)) {
+        showCategoryDropdown.value = false;
+    }
+};
+
 onMounted(() => {
     dataStore.fetchPublicData();
     dataStore.fetchSettings();
+    document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
 });
 
 // 获取权重最高（sort_order 最小）的3个分类
@@ -185,6 +258,22 @@ const topCategories = computed(() => {
         .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
         .slice(0, 3);
 });
+
+// 根据分类ID获取分类名称
+const getCategoryName = (categoryId) => {
+    const cat = categories.value.find(c => c.id === categoryId);
+    return cat ? cat.name : '全部分类';
+};
+
+// 获取排序方式的显示名称
+const getSortLabel = (sort) => {
+    const labels = {
+        'default': '默认排序',
+        'newest': '最新添加',
+        'name': '名称排序'
+    };
+    return labels[sort] || '默认排序';
+};
 
 const handleSubmit = async () => {
     try {
@@ -248,12 +337,19 @@ const filteredGroups = computed(() => {
 
     // 4. Apply Sorting
     if (sortBy.value === 'newest') {
-        // Flatten, sort, then maybe re-group or just show as one list?
-        // Retaining group structure for now, but sorting items within groups
+        // 按创建时间降序排序
         groups = groups.map(group => {
             return {
                 ...group,
                 items: [...group.items].sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+            }
+        });
+    } else if (sortBy.value === 'name') {
+        // 按名称字母排序
+        groups = groups.map(group => {
+            return {
+                ...group,
+                items: [...group.items].sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'))
             }
         });
     }

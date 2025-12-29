@@ -38,15 +38,30 @@
             <!-- Categories -->
             <nav class="space-y-2 mb-8">
                 <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">分类</h4>
-                <a href="#" @click.prevent="scrollToTop" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-primary bg-primary/10 dark:text-accent dark:bg-accent/10 hover:bg-primary/20 dark:hover:bg-accent/20 transition">
+                <a href="#" @click.prevent="scrollToTop" 
+                   class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition"
+                   :class="activeCategoryId === null 
+                       ? 'text-primary bg-primary/10 dark:text-accent dark:bg-accent/10' 
+                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'">
                     <span class="material-symbols-outlined text-lg mr-2">apps</span>
                     全部项目
-                    <span class="ml-auto text-xs font-semibold px-2 py-0.5 bg-primary/20 dark:bg-accent/20 rounded-full text-primary dark:text-accent">{{ totalItemsCount }}</span>
+                    <span class="ml-auto text-xs font-semibold px-2 py-0.5 rounded-full"
+                          :class="activeCategoryId === null 
+                              ? 'bg-primary/20 dark:bg-accent/20 text-primary dark:text-accent' 
+                              : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">{{ totalItemsCount }}</span>
                 </a>
-                <a v-for="cat in categories.filter(c => c.name !== '全部项目')" :key="cat.id" :href="'#cat-' + cat.id" @click.prevent="scrollToCategory(cat.id)" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                    <span class="material-symbols-outlined text-lg mr-2 text-gray-500 dark:text-gray-400">{{ cat.icon || 'folder' }}</span>
+                <a v-for="cat in categories.filter(c => c.name !== '全部项目')" :key="cat.id" :href="'#cat-' + cat.id" @click.prevent="scrollToCategory(cat.id)" 
+                   class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition"
+                   :class="activeCategoryId === cat.id 
+                       ? 'text-primary bg-primary/10 dark:text-accent dark:bg-accent/10' 
+                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'">
+                    <span class="material-symbols-outlined text-lg mr-2" 
+                          :class="activeCategoryId === cat.id ? 'text-primary dark:text-accent' : 'text-gray-500 dark:text-gray-400'">{{ cat.icon || 'folder' }}</span>
                     {{ cat.name }}
-                    <span class="ml-auto text-xs font-semibold px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded-full text-gray-600 dark:text-gray-300">{{ categoryCounts[cat.id] || 0 }}</span>
+                    <span class="ml-auto text-xs font-semibold px-2 py-0.5 rounded-full"
+                          :class="activeCategoryId === cat.id 
+                              ? 'bg-primary/20 dark:bg-accent/20 text-primary dark:text-accent' 
+                              : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">{{ categoryCounts[cat.id] || 0 }}</span>
                 </a>
             </nav>
             
@@ -128,7 +143,7 @@
 </template>
 
 <script setup>
-import { onMounted, computed } from 'vue';
+import { onMounted, onUnmounted, computed, ref } from 'vue';
 import { useDataStore } from '../stores/data';
 import { storeToRefs } from 'pinia';
 
@@ -137,11 +152,65 @@ const { categories, categoryCounts, items, tags, filters, settings, friendLinks 
 
 const totalItemsCount = computed(() => items.value.length);
 
+// 当前活动分类的ID（滚动监听）
+const activeCategoryId = ref(null);
+
+// 滚动监听：检测当前视口中可见的分类区块
+const handleScroll = () => {
+    const scrollTop = window.scrollY;
+    const headerHeight = 65; // header 高度
+    const offset = headerHeight + 50; // 偏移量，提前一点触发
+    
+    // 如果滚动到顶部，高亮"全部项目"
+    if (scrollTop < 200) {
+        activeCategoryId.value = null;
+        return;
+    }
+    
+    // 获取所有分类区块
+    const categoryElements = categories.value
+        .filter(c => c.name !== '全部项目')
+        .map(cat => {
+            const el = document.getElementById('cat-' + cat.id);
+            return { id: cat.id, el };
+        })
+        .filter(item => item.el);
+    
+    // 找到当前视口中可见的分类
+    let currentCategory = null;
+    
+    for (const { id, el } of categoryElements) {
+        const rect = el.getBoundingClientRect();
+        // 如果区块的顶部在视口上半部分内
+        if (rect.top <= offset && rect.bottom > offset) {
+            currentCategory = id;
+            break;
+        }
+        // 如果区块完全在视口上方，记录它（可能是最后一个可见的）
+        if (rect.top < offset) {
+            currentCategory = id;
+        }
+    }
+    
+    if (currentCategory !== null) {
+        activeCategoryId.value = currentCategory;
+    }
+};
+
 onMounted(() => {
+    // 设置滚动监听
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    // 初始检测
+    handleScroll();
+    
     // Ensure settings are fetched if not already valid
     if (Object.keys(settings.value).length === 0) {
         dataStore.fetchSettings();
     }
+});
+
+onUnmounted(() => {
+    window.removeEventListener('scroll', handleScroll);
 });
 
 const toggleDarkMode = () => {
