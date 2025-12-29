@@ -189,7 +189,10 @@ const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
+const emit = defineEmits(['navigate-category']);
+
 const scrollToCategory = (id) => {
+    emit('navigate-category', id);
     const el = document.getElementById('cat-' + id);
     if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });

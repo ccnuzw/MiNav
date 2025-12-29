@@ -1,5 +1,5 @@
 <template>
-  <MainLayout>
+  <MainLayout @navigate-category="handleSidebarNavigation">
     <div class="text-center mb-16 relative z-10">
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 text-gray-900 dark:text-white">
             {{ settings.hero_title || '发现最好的' }}
@@ -274,7 +274,7 @@
 
 </template>
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue';
 import MainLayout from '../layouts/MainLayout.vue';
 import { useDataStore } from '../stores/data';
 import { useNotificationStore } from '../stores/notification';
@@ -364,6 +364,24 @@ const selectSort = (value) => {
 const selectCategory = (value) => {
     quickFilter.value = value;
     showCategoryDropdown.value = false;
+};
+
+// 处理侧边栏导航点击
+const handleSidebarNavigation = async (id) => {
+    // 1. 如果当前有筛选，先清除筛选
+    if (quickFilter.value !== 'all') {
+        quickFilter.value = 'all';
+        // 等待DOM更新，确保所有分类都显示出来
+        await nextTick();
+    }
+    
+    // 2. 滚动到对应分类
+    const el = document.getElementById('cat-' + id);
+    if (el) {
+        // 使用与 MainLayout 相同的滚动逻辑，这里主要是为了确保在清除筛选后能滚动
+        // 因为 MainLayout 的 scrollIntoView 可能在元素隐藏时失效
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 };
 
 // 点击外部关闭下拉框
