@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Awesome Cloudflare - Cloudflare Project Explorer</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#F48120", 
+                        "primary-hover": "#e06c09",
+                        "secondary-bg": "#f9fafb",
+                        "dark-bg": "#111827",
+                        "dark-card": "#1f2937",
+                        "dark-text": "#e5e7eb",
+                        "dark-border": "#374151",
+                        "background-light": "#ffffff",
+                        "background-dark": "#111827",
+                    },
+                    fontFamily: {
+                        display: ["Noto Sans SC", "sans-serif"],
+                        sans: ["Noto Sans SC", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.5rem",
+                    },
+                },
+            },
+        };
+    </script>
+<style>::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background-color: #cbd5e1;
+            border-radius: 20px;
+        }
+        .dark ::-webkit-scrollbar-thumb {
+            background-color: #4b5563;
+        }.decor-line {
+            position: absolute;
+            height: 1px;
+            background-color: #F48120;
+            opacity: 0.6;
+        }
+        .decor-dot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background-color: #F48120;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body class="font-display bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-200 transition-colors duration-200">
+<header class="w-full px-6 py-4 flex justify-between items-center max-w-7xl mx-auto">
+<div class="flex items-center space-x-2">
+<div class="text-2xl font-bold flex flex-col leading-tight">
+<span class="text-gray-800 dark:text-white">Awesome</span>
+<span class="flex items-center text-gray-800 dark:text-white">
+                    cloudFlare
+                    <i class="fas fa-cloud text-gray-800 dark:text-white ml-1"></i>
+</span>
+</div>
+</div>
+<div class="flex items-center space-x-6 text-xl">
+<a class="text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition" href="#"><i class="fab fa-github"></i></a>
+<a class="text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition" href="#"><i class="fab fa-twitter"></i></a>
+<a class="text-yellow-500 hover:text-yellow-600 dark:text-yellow-400 transition" href="#"><i class="fas fa-coffee"></i></a>
+<button class="text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-primary transition" onclick="document.documentElement.classList.toggle('dark')">
+<i class="fas fa-moon dark:hidden"></i>
+<i class="fas fa-sun hidden dark:inline"></i>
+</button>
+</div>
+</header>
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative overflow-hidden">
+<div class="hidden lg:block absolute left-0 top-32 w-24">
+<div class="relative h-24 border-l border-primary/40 border-t border-b w-full">
+<div class="absolute -left-1 top-1/2 w-2 h-2 bg-primary rounded-full transform -translate-y-1/2"></div>
+<div class="absolute right-0 top-0 w-16 h-[1px] bg-primary/40"></div>
+<div class="absolute right-0 bottom-0 w-16 h-[1px] bg-primary/40"></div>
+</div>
+</div>
+<div class="hidden lg:block absolute right-0 top-32 w-24 transform rotate-180">
+<div class="relative h-24 border-l border-primary/40 border-t border-b w-full">
+<div class="absolute -left-1 top-1/2 w-2 h-2 bg-primary rounded-full transform -translate-y-1/2"></div>
+</div>
+</div>
+<div class="text-center mb-16 relative z-10">
+<h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 text-gray-900 dark:text-white">
+                发现最好的
+            </h1>
+<h2 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
+<span class="text-primary">Cloudflare</span> <span class="text-primary">开源工具 &amp; 文档</span>
+</h2>
+<p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg mb-10 leading-relaxed">
+                出海第一站，搞定工具栈，一系列基于CloudFlare的开源工具 &amp; <br/>
+                技术栈，旨在帮助独立开发者快速构建和发布SaaS产品。
+            </p>
+<div class="max-w-2xl mx-auto relative mb-6">
+<input class="w-full pl-6 pr-12 py-3.5 rounded-lg border-2 border-primary focus:ring-4 focus:ring-primary/20 focus:border-primary outline-none text-gray-700 dark:bg-dark-card dark:text-gray-200 dark:border-primary transition shadow-sm" placeholder="快来搜一搜你感兴趣的工具或文档吧" type="text"/>
+<button class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-primary transition">
+<i class="fas fa-level-down-alt transform rotate-90"></i>
+</button>
+</div>
+<div class="flex justify-center items-center space-x-6 text-sm">
+<a class="flex items-center text-primary hover:underline" href="#">
+                    提交工具 <span class="ml-1">👉</span>
+</a>
+<span class="text-gray-300 dark:text-gray-600">|</span>
+<a class="flex items-center text-primary hover:underline" href="#">
+                    意见反馈 <span class="ml-1">👉</span>
+</a>
+</div>
+</div>
+<div class="flex flex-col md:flex-row justify-between items-center mb-10 space-y-4 md:space-y-0">
+<div class="w-full md:w-auto relative group">
+<button class="w-full md:w-48 px-4 py-2 bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-lg flex justify-between items-center text-gray-700 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 transition">
+<span>排行榜</span>
+<i class="fas fa-chevron-down text-xs text-gray-400"></i>
+</button>
+</div>
+<div class="flex bg-gray-100 dark:bg-dark-card p-1 rounded-lg">
+<button class="px-6 py-1.5 bg-white dark:bg-primary text-primary dark:text-white rounded shadow-sm text-sm font-medium transition">
+                    图床
+                </button>
+<button class="px-6 py-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded text-sm font-medium transition">
+                    邮箱
+                </button>
+<button class="px-6 py-1.5 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded text-sm font-medium transition">
+                    短链
+                </button>
+</div>
+<div class="w-full md:w-auto relative">
+<button class="w-full md:w-48 px-4 py-2 bg-white dark:bg-dark-card border border-gray-200 dark:border-dark-border rounded-lg flex justify-between items-center text-gray-700 dark:text-gray-200 hover:border-gray-300 dark:hover:border-gray-600 transition">
+<span>甄选工具</span>
+<i class="fas fa-chevron-down text-xs text-gray-400"></i>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div class="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-dark-border p-6 hover:shadow-lg transition duration-300 relative group">
+<div class="absolute top-4 right-4 text-xl">🔥</div>
+<div class="flex items-start space-x-4 mb-4">
+<div class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center text-white flex-shrink-0">
+<i class="fab fa-github text-2xl"></i>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white text-lg">roim-picx</h3>
+</div>
+</div>
+<p class="text-gray-600 dark:text-gray-400 text-sm mb-6 h-20 overflow-hidden text-ellipsis line-clamp-3">
+                    free image service based on cloudflare Pages &amp; R2. 基于CloudFlare Pages和R2实现的免费图床。
+                </p>
+<div class="flex flex-wrap gap-2 mt-auto">
+<span class="px-3 py-1 bg-primary text-white text-xs rounded-md">源码</span>
+<span class="px-3 py-1 bg-orange-200 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200 text-xs rounded-md">Active</span>
+</div>
+</div>
+<div class="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-dark-border p-6 hover:shadow-lg transition duration-300 flex flex-col">
+<div class="flex items-start space-x-4 mb-4">
+<div class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center text-white flex-shrink-0">
+<i class="fab fa-github text-2xl"></i>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white text-lg">telegraph-image</h3>
+</div>
+</div>
+<p class="text-gray-600 dark:text-gray-400 text-sm mb-6 h-20 overflow-hidden text-ellipsis line-clamp-3">
+                    一个开源的图片托管模板项目，利用Cloudflare Pages 和 Vercel 等服务可以无限地储存和管理图片，支持自定义域名、图片审查 API、后台管理和日志管理等功能。
+                </p>
+<div class="flex flex-wrap gap-2 mt-auto">
+<span class="px-3 py-1 bg-primary text-white text-xs rounded-md">源码</span>
+<span class="px-3 py-1 bg-primary text-white text-xs rounded-md">在线访问</span>
+<span class="px-3 py-1 bg-orange-200 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200 text-xs rounded-md">Active</span>
+</div>
+</div>
+<div class="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-dark-border p-6 hover:shadow-lg transition duration-300 flex flex-col">
+<div class="flex items-start space-x-4 mb-4">
+<div class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center text-white flex-shrink-0">
+<i class="fab fa-github text-2xl"></i>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white text-lg">telegraph-image-hosting</h3>
+</div>
+</div>
+<p class="text-gray-600 dark:text-gray-400 text-sm mb-6 h-20 overflow-hidden text-ellipsis line-clamp-3">
+                    使用 Telegraph 构建免费图像托管
+                </p>
+<div class="flex flex-wrap gap-2 mt-auto">
+<span class="px-3 py-1 bg-primary text-white text-xs rounded-md">源码</span>
+<span class="px-3 py-1 bg-gray-300 text-gray-600 dark:bg-gray-700 dark:text-gray-400 text-xs rounded-md">Inactive</span>
+</div>
+</div>
+<div class="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-dark-border p-6 hover:shadow-lg transition duration-300 flex flex-col">
+<div class="flex items-start space-x-4 mb-4">
+<div class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center text-white flex-shrink-0">
+<i class="fab fa-github text-2xl"></i>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white text-lg">img-mom</h3>
+</div>
+</div>
+<p class="text-gray-600 dark:text-gray-400 text-sm mb-6 h-20 overflow-hidden text-ellipsis line-clamp-3">
+                    基于 Cloudflare Workers 运行时构建，轻量使用完全免费，支持多种图床 (Telegram/Cloudfalre R2/Backblaze B2, 更多图床正在支持中)，快速部署。使用 Wrangler 可快速实现自部署
+                </p>
+<div class="flex flex-wrap gap-2 mt-auto">
+<span class="px-3 py-1 bg-primary text-white text-xs rounded-md">源码</span>
+<span class="px-3 py-1 bg-orange-200 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200 text-xs rounded-md">Active</span>
+</div>
+</div>
+<div class="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-dark-border p-6 hover:shadow-lg transition duration-300 flex flex-col">
+<div class="flex items-start space-x-4 mb-4">
+<div class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center text-white flex-shrink-0">
+<i class="fab fa-github text-2xl"></i>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white text-lg">cloudflare-worker-image</h3>
+</div>
+</div>
+<p class="text-gray-600 dark:text-gray-400 text-sm mb-6 h-20 overflow-hidden text-ellipsis line-clamp-3">
+                    使用 Cloudflare Worker 处理图片，依赖 Photon，支持缩放、剪裁、水印、滤镜等功能。
+                </p>
+<div class="flex flex-wrap gap-2 mt-auto">
+<span class="px-3 py-1 bg-primary text-white text-xs rounded-md">源码</span>
+<span class="px-3 py-1 bg-orange-200 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200 text-xs rounded-md">Active</span>
+</div>
+</div>
+<div class="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-dark-border p-6 hover:shadow-lg transition duration-300 flex flex-col">
+<div class="flex items-start space-x-4 mb-4">
+<div class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center text-white flex-shrink-0">
+<i class="fab fa-github text-2xl"></i>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white text-lg">cf-image-hosting</h3>
+</div>
+</div>
+<p class="text-gray-600 dark:text-gray-400 text-sm mb-6 h-20 overflow-hidden text-ellipsis line-clamp-3">
+                    在 Telegraph 上免费无限制地托管图像，部署在 Cloudflare 上。
+                </p>
+<div class="flex flex-wrap gap-2 mt-auto">
+<span class="px-3 py-1 bg-primary text-white text-xs rounded-md">源码</span>
+<span class="px-3 py-1 bg-primary text-white text-xs rounded-md">在线访问</span>
+<span class="px-3 py-1 bg-orange-200 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200 text-xs rounded-md">Active</span>
+</div>
+</div>
+<div class="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-dark-border p-6 hover:shadow-lg transition duration-300 flex flex-col">
+<div class="flex items-start space-x-4 mb-4">
+<div class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center text-white flex-shrink-0">
+<i class="fab fa-github text-2xl"></i>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white text-lg">tgstate</h3>
+</div>
+</div>
+<p class="text-gray-600 dark:text-gray-400 text-sm mb-6 h-20 overflow-hidden text-ellipsis line-clamp-3">
+                    使用Telegram作为存储的文件外链系统，不限制文件大小和格式。
+                </p>
+<div class="flex flex-wrap gap-2 mt-auto">
+<span class="px-3 py-1 bg-primary text-white text-xs rounded-md">源码</span>
+<span class="px-3 py-1 bg-primary text-white text-xs rounded-md">在线访问</span>
+<span class="px-3 py-1 bg-orange-200 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200 text-xs rounded-md">Active</span>
+</div>
+</div>
+<div class="bg-white dark:bg-dark-card rounded-xl border border-gray-200 dark:border-dark-border p-6 hover:shadow-lg transition duration-300 flex flex-col">
+<div class="flex items-start space-x-4 mb-4">
+<div class="w-12 h-12 bg-gray-900 rounded-full flex items-center justify-center text-white flex-shrink-0">
+<i class="fab fa-github text-2xl"></i>
+</div>
+<div>
+<h3 class="font-bold text-gray-900 dark:text-white text-lg">workers-image-hosting</h3>
+</div>
+</div>
+<p class="text-gray-600 dark:text-gray-400 text-sm mb-6 h-20 overflow-hidden text-ellipsis line-clamp-3">
+                    基于cloudflare workers数据存储于KV的图床
+                </p>
+<div class="flex flex-wrap gap-2 mt-auto">
+<span class="px-3 py-1 bg-primary text-white text-xs rounded-md">源码</span>
+<span class="px-3 py-1 bg-orange-200 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200 text-xs rounded-md">Active</span>
+</div>
+</div>
+</div>
+</main>
+<footer class="bg-white dark:bg-dark-card border-t border-gray-200 dark:border-dark-border mt-16 pt-16 pb-12">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12">
+<div class="space-y-4">
+<h3 class="text-primary font-bold text-lg">Awesome Cloudflare</h3>
+<p class="text-sm text-gray-500 dark:text-gray-400 leading-relaxed">
+                        精选的 Cloudflare 工具、开源项目、指南、博客和其他资源列表。
+                    </p>
+<div class="flex space-x-4 pt-2">
+<a class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" href="#"><i class="fab fa-facebook text-xl"></i></a>
+<a class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" href="#"><i class="fab fa-instagram text-xl"></i></a>
+<a class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" href="#"><i class="fab fa-twitter text-xl"></i></a>
+<a class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" href="#"><i class="fab fa-github text-xl"></i></a>
+<a class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" href="#"><i class="fas fa-globe text-xl"></i></a>
+</div>
+</div>
+<div>
+<h4 class="font-semibold text-gray-900 dark:text-white mb-4">Services</h4>
+<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+<li><a class="hover:text-primary transition" href="#">小报童甄选专栏</a></li>
+<li><a class="hover:text-primary transition" href="#">独立开发者出海工具栈</a></li>
+<li><a class="hover:text-primary transition" href="#">ChatNext</a></li>
+<li><a class="hover:text-primary transition" href="#">Hacker SEO Tools</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-semibold text-gray-900 dark:text-white mb-4">Credit to</h4>
+<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+<li><a class="hover:text-primary transition" href="#">gpts.works</a></li>
+<li><a class="hover:text-primary transition" href="#">xiaobaot.best</a></li>
+</ul>
+</div>
+<div>
+<h4 class="font-semibold text-gray-900 dark:text-white mb-4">Helpful Links</h4>
+<ul class="space-y-2 text-sm text-gray-600 dark:text-gray-400">
+<li><a class="hover:text-primary transition" href="#">Ruankao</a></li>
+<li><a class="hover:text-primary transition" href="#">Blog</a></li>
+<li><a class="hover:text-primary transition" href="#">AIGC</a></li>
+</ul>
+</div>
+</div>
+<div class="mt-12 pt-8 border-t border-gray-100 dark:border-gray-700 flex flex-col md:flex-row justify-between items-center text-sm text-gray-500 dark:text-gray-400">
+<p>© 2023 Awesome Cloudflare. All rights reserved.</p>
+<div class="mt-2 md:mt-0">
+<span class="font-semibold text-gray-900 dark:text-white mb-2 block md:inline md:mb-0 md:mr-4">Legal</span>
+<a class="hover:text-primary transition" href="#">privacy</a>
+</div>
+</div>
+</div>
+</footer>
+<div class="fixed bottom-8 right-8 flex flex-col space-y-3 z-50">
+<button class="w-12 h-12 bg-primary rounded-lg shadow-lg flex items-center justify-center text-white hover:bg-primary-hover transition transform hover:scale-105">
+<i class="fas fa-chevron-up"></i>
+</button>
+<button class="w-12 h-12 bg-indigo-500 rounded-full shadow-lg flex items-center justify-center text-white hover:bg-indigo-600 transition transform hover:scale-105">
+<i class="fas fa-ghost"></i>
+</button>
+</div>
+
+</body></html>
