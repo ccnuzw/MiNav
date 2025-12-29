@@ -23,8 +23,12 @@
                     <td class="px-6 py-4"><span class="material-symbols-outlined">{{ cat.icon }}</span> ({{ cat.icon }})</td>
                     <td class="px-6 py-4">{{ cat.sort_order }}</td>
                     <td class="px-6 py-4 space-x-2">
-                        <button @click="openEditModal(cat)" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">编辑</button>
-                        <button @click="deleteCategory(cat.id)" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">删除</button>
+                        <button @click="openEditModal(cat)" class="px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 transition">
+                            <i class="fas fa-edit mr-1"></i>编辑
+                        </button>
+                        <button @click="deleteCategory(cat.id)" class="px-3 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition">
+                            <i class="fas fa-trash mr-1"></i>删除
+                        </button>
                     </td>
                 </tr>
             </tbody>

@@ -23,8 +23,12 @@
                     <td class="px-6 py-4 truncate max-w-xs">{{ link.url }}</td>
                     <td class="px-6 py-4">{{ link.sort_order }}</td>
                     <td class="px-6 py-4 space-x-2">
-                        <button @click="editLink(link)" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">编辑</button>
-                        <button @click="deleteLink(link.id)" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">删除</button>
+                        <button @click="editLink(link)" class="px-3 py-1 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition">
+                            <i class="fas fa-edit mr-1"></i>编辑
+                        </button>
+                        <button @click="deleteLink(link.id)" class="px-3 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition">
+                            <i class="fas fa-trash mr-1"></i>删除
+                        </button>
                     </td>
                 </tr>
             </tbody>
@@ -48,9 +52,35 @@
                     <label class="block text-sm font-medium dark:text-gray-300">描述</label>
                     <textarea v-model="form.description" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white"></textarea>
                 </div>
-                 <div>
-                    <label class="block text-sm font-medium dark:text-gray-300">图标 URL (可选)</label>
-                    <input v-model="form.icon" type="text" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="https://..." />
+                <div>
+                    <label class="block text-sm font-medium dark:text-gray-300 mb-2">图标</label>
+                    <div class="flex items-start gap-4">
+                        <!-- 图标预览 -->
+                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600 flex-shrink-0">
+                            <img v-if="iconPreviewUrl" :src="iconPreviewUrl" alt="图标预览" class="w-full h-full object-cover" @error="iconPreviewError = true" />
+                            <i v-else-if="form.icon && !form.icon.startsWith('http')" :class="form.icon" class="text-2xl text-gray-500"></i>
+                            <span v-else class="text-gray-400 text-xs text-center">预览</span>
+                        </div>
+                        <div class="flex-1 space-y-2">
+                            <input v-model="form.icon" type="text" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white text-sm" placeholder="图标URL、FontAwesome类名 或 留空自动获取" />
+                            <!-- 快捷操作 -->
+                            <div class="flex flex-wrap gap-2">
+                                <button type="button" @click="autoFetchIcon('unavatar')" class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 transition">
+                                    <i class="fas fa-magic mr-1"></i>Unavatar
+                                </button>
+                                <button type="button" @click="autoFetchIcon('clearbit')" class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded hover:bg-green-200 dark:hover:bg-green-900/50 transition">
+                                    <i class="fas fa-building mr-1"></i>Clearbit
+                                </button>
+                                <button type="button" @click="autoFetchIcon('iconhorse')" class="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition">
+                                    <i class="fas fa-horse mr-1"></i>Icon Horse
+                                </button>
+                                <button type="button" @click="form.icon = ''" class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                                    <i class="fas fa-undo mr-1"></i>使用默认
+                                </button>
+                            </div>
+                            <p class="text-xs text-gray-400">留空将自动从网站获取图标 | 支持 FontAwesome 类名如 <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">fab fa-github</code></p>
+                        </div>
+                    </div>
                 </div>
                  <div>
                     <label class="block text-sm font-medium dark:text-gray-300">排序 (Sort Order)</label>
@@ -67,7 +97,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useDataStore } from '../stores/data';
 import { useAuthStore } from '../stores/auth';
 
@@ -78,6 +108,41 @@ const authStore = useAuthStore();
 const showAddModal = ref(false);
 const editingLink = ref(null);
 const form = ref({ name: '', url: '', description: '', icon: '', sort_order: 0 });
+const iconPreviewError = ref(false);
+
+// 图标预览URL计算
+const iconPreviewUrl = computed(() => {
+    if (!form.value.icon) return '';
+    if (form.value.icon.startsWith('http') || form.value.icon.startsWith('/')) {
+        return form.value.icon;
+    }
+    return ''; // FontAwesome类名，不返回URL
+});
+
+// 自动获取图标
+const autoFetchIcon = (service) => {
+    if (!form.value.url) {
+        alert('请先输入友链链接');
+        return;
+    }
+    try {
+        const domain = new URL(form.value.url).hostname;
+        switch (service) {
+            case 'unavatar':
+                form.value.icon = `https://unavatar.io/${domain}`;
+                break;
+            case 'clearbit':
+                form.value.icon = `https://logo.clearbit.com/${domain}`;
+                break;
+            case 'iconhorse':
+                form.value.icon = `https://icon.horse/icon/${domain}`;
+                break;
+        }
+        iconPreviewError.value = false;
+    } catch {
+        alert('链接格式不正确');
+    }
+};
 
 onMounted(async () => {
     await loadLinks();

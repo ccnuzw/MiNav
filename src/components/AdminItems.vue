@@ -17,6 +17,7 @@
         <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
             <thead class="bg-gray-50 dark:bg-gray-700 text-xs uppercase text-gray-700 dark:text-gray-300">
                 <tr>
+                    <th scope="col" class="px-4 py-3 w-16">图标</th>
                     <th scope="col" class="px-6 py-3">名称</th>
                     <th scope="col" class="px-6 py-3">链接</th>
                     <th scope="col" class="px-6 py-3">分类</th>
@@ -28,6 +29,12 @@
             </thead>
             <tbody>
                 <tr v-for="item in items" :key="item.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    <td class="px-4 py-4">
+                        <div class="w-8 h-8 rounded flex items-center justify-center overflow-hidden">
+                            <img v-if="getItemIconType(item) === 'image'" :src="getItemIconSrc(item)" alt="" class="w-full h-full object-cover" />
+                            <i v-else :class="getItemIconSrc(item)" class="text-lg text-gray-600 dark:text-gray-300"></i>
+                        </div>
+                    </td>
                     <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ item.name }}</td>
                     <td class="px-6 py-4 truncate max-w-xs">{{ item.url }}</td>
                     <td class="px-6 py-4">{{ getCategoryName(item.category_id) }}</td>
@@ -42,8 +49,12 @@
                         <span :class="item.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 py-0.5 rounded text-xs">{{ item.status }}</span>
                     </td>
                     <td class="px-6 py-4 space-x-2">
-                        <button @click="editItem(item)" class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">编辑</button>
-                        <button @click="deleteItem(item.id)" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">删除</button>
+                        <button @click="editItem(item)" class="px-3 py-1 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition">
+                            <i class="fas fa-edit mr-1"></i>编辑
+                        </button>
+                        <button @click="deleteItem(item.id)" class="px-3 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition">
+                            <i class="fas fa-trash mr-1"></i>删除
+                        </button>
                     </td>
                 </tr>
             </tbody>
@@ -171,6 +182,18 @@ const limit = ref(20);
 
 const dataStore = useDataStore();
 const authStore = useAuthStore();
+
+// 获取项目图标类型
+const getItemIconType = (item) => {
+    const icon = item.icon || dataStore.settings.default_icon || 'fab fa-github';
+    if (icon.startsWith('http') || icon.startsWith('/')) return 'image';
+    return 'class';
+};
+
+// 获取项目图标源
+const getItemIconSrc = (item) => {
+    return item.icon || dataStore.settings.default_icon || 'fab fa-github';
+};
 
 const showAddModal = ref(false);
 const editingItem = ref(null);

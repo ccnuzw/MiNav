@@ -111,6 +111,11 @@
                 </h3>
                 <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-x-6 gap-y-4 max-w-5xl mx-auto">
                     <a v-for="link in friendLinks" :key="link.id" :href="link.url" target="_blank" class="flex flex-col items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition group">
+                         <!-- 图标显示 -->
+                         <div class="w-10 h-10 mb-2 rounded-lg flex items-center justify-center overflow-hidden bg-gray-100 dark:bg-gray-700 flex-shrink-0">
+                            <img v-if="getLinkIconType(link) === 'image'" :src="getLinkIconSrc(link)" alt="" class="w-full h-full object-cover" />
+                            <i v-else :class="getLinkIconSrc(link)" class="text-lg text-gray-500 dark:text-gray-300"></i>
+                         </div>
                          <div class="font-medium text-gray-600 dark:text-gray-300 group-hover:text-primary dark:group-hover:text-accent transition truncate w-full text-center">{{ link.name }}</div>
                          <div v-if="link.description" class="text-xs text-gray-400 dark:text-gray-500 mt-1 truncate w-full text-center opacity-0 group-hover:opacity-100 transition duration-300">{{ link.description }}</div>
                     </a>
@@ -166,5 +171,26 @@ const toggleTagFilter = (tagId) => {
     } else {
         filters.value.tags.push(tagId);
     }
+}
+
+// 获取友链图标类型
+const getLinkIconType = (link) => {
+    if (!link.icon) return 'image'; // 默认使用自动获取图片
+    if (link.icon.startsWith('http') || link.icon.startsWith('/')) return 'image';
+    return 'class'; // FontAwesome 类名
+}
+
+// 获取友链图标源
+const getLinkIconSrc = (link) => {
+    if (!link.icon) {
+        // 从 URL 提取域名，使用 Unavatar 获取图标
+        try {
+            const domain = new URL(link.url).hostname;
+            return `https://unavatar.io/${domain}?fallback=https://icon.horse/icon/${domain}`;
+        } catch {
+            return `https://unavatar.io/${link.url}`;
+        }
+    }
+    return link.icon; // 返回 URL 或 FontAwesome 类名
 }
 </script>

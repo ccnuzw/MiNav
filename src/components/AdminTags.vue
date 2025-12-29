@@ -31,8 +31,12 @@
                     </td>
                     <td class="px-6 py-4">{{ tag.sort_order }}</td>
                     <td class="px-6 py-4 space-x-2">
-                        <button @click="editTag(tag)" class="text-primary hover:text-primary-hover dark:text-accent dark:hover:text-accent-dark">编辑</button>
-                        <button @click="deleteTag(tag.id)" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">删除</button>
+                        <button @click="editTag(tag)" class="px-3 py-1 text-xs bg-primary/10 dark:bg-accent/20 text-primary dark:text-accent rounded hover:bg-primary/20 dark:hover:bg-accent/30 transition">
+                            <i class="fas fa-edit mr-1"></i>编辑
+                        </button>
+                        <button @click="deleteTag(tag.id)" class="px-3 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition">
+                            <i class="fas fa-trash mr-1"></i>删除
+                        </button>
                     </td>
                 </tr>
                 <tr v-if="tags.length === 0">

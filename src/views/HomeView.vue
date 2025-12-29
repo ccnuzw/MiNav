@@ -76,9 +76,9 @@
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                  <div v-for="item in category.items" :key="item.id" class="bg-white dark:bg-dark-card rounded-lg border border-gray-200 dark:border-dark-border p-4 hover:shadow-lg transition duration-300 flex items-start space-x-4">
-                    <div class="w-10 h-10 bg-gray-800 dark:bg-gray-700 rounded-md flex items-center justify-center text-white flex-shrink-0 overflow-hidden">
+                    <div class="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0 overflow-hidden">
                         <img v-if="getIconType(item) === 'image'" :src="getIconSrc(item)" alt="Icon" class="w-full h-full object-cover" />
-                        <i v-else :class="getIconSrc(item)" class="text-xl dark:text-gray-300"></i>
+                        <i v-else :class="getIconSrc(item)" class="text-xl text-gray-600 dark:text-gray-300"></i>
                     </div>
                     <div class="flex-1">
                         <div class="flex justify-between items-start mb-1">
@@ -200,20 +200,20 @@ const handleSubmit = async () => {
 }
 
 const getIconType = (item) => {
-    if (!item.icon) return 'image'; // Default to auto-favicon image
+    if (!item.icon) {
+        // 检查默认图标类型
+        const defaultIcon = settings.value.default_icon || 'fab fa-github';
+        if (defaultIcon.startsWith('http') || defaultIcon.startsWith('/')) return 'image';
+        return 'class';
+    }
     if (item.icon.startsWith('http') || item.icon.startsWith('/')) return 'image';
     return 'class';
 }
 
 const getIconSrc = (item) => {
     if (!item.icon) {
-        // 从 URL 提取域名，使用 Unavatar 获取高清图标
-        try {
-            const domain = new URL(item.url).hostname;
-            return `https://unavatar.io/${domain}?fallback=https://icon.horse/icon/${domain}`;
-        } catch {
-            return `https://unavatar.io/${item.url}`;
-        }
+        // 使用站点设置的默认图标，如果没有设置则使用 GitHub 图标
+        return settings.value.default_icon || 'fab fa-github';
     }
     if (item.icon.startsWith('http') || item.icon.startsWith('/')) {
         return item.icon;

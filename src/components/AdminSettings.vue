@@ -26,6 +26,50 @@
             <textarea v-model="form.hero_description" rows="4" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white"></textarea>
         </div>
         
+        <hr class="border-gray-200 dark:border-gray-700" />
+        
+        <!-- 默认项目图标设置 -->
+        <div>
+            <label class="block text-sm font-medium mb-2 dark:text-gray-300">默认项目图标</label>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">当项目没有设置图标时，将显示此默认图标</p>
+            <div class="flex items-start gap-4">
+                <!-- 图标预览 -->
+                <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600 flex-shrink-0">
+                    <img v-if="defaultIconPreviewUrl" :src="defaultIconPreviewUrl" alt="图标预览" class="w-full h-full object-cover" />
+                    <i v-else-if="form.default_icon && !form.default_icon.startsWith('http')" :class="form.default_icon" class="text-2xl text-gray-500"></i>
+                    <i v-else class="fab fa-github text-2xl text-gray-400"></i>
+                </div>
+                <div class="flex-1 space-y-2">
+                    <input v-model="form.default_icon" type="text" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white text-sm" placeholder="图标URL 或 FontAwesome类名，如 fab fa-github" />
+                    <!-- 快捷选择 -->
+                    <div class="flex flex-wrap gap-2">
+                        <button type="button" @click="form.default_icon = 'fab fa-github'" class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                            <i class="fab fa-github mr-1"></i>GitHub
+                        </button>
+                        <button type="button" @click="form.default_icon = 'fas fa-link'" class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                            <i class="fas fa-link mr-1"></i>链接
+                        </button>
+                        <button type="button" @click="form.default_icon = 'fas fa-globe'" class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                            <i class="fas fa-globe mr-1"></i>地球
+                        </button>
+                        <button type="button" @click="form.default_icon = 'fas fa-code'" class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                            <i class="fas fa-code mr-1"></i>代码
+                        </button>
+                        <button type="button" @click="form.default_icon = 'fas fa-cube'" class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                            <i class="fas fa-cube mr-1"></i>方块
+                        </button>
+                        <button type="button" @click="form.default_icon = 'fas fa-rocket'" class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                            <i class="fas fa-rocket mr-1"></i>火箭
+                        </button>
+                        <button type="button" @click="form.default_icon = ''" class="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition">
+                            <i class="fas fa-undo mr-1"></i>清空
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-400">支持 FontAwesome 类名（如 <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">fab fa-github</code>）或图片 URL</p>
+                </div>
+            </div>
+        </div>
+        
         <div class="flex justify-end">
             <button type="submit" :disabled="loading" class="px-6 py-2 bg-primary text-white rounded hover:bg-primary-hover disabled:opacity-50">
                 {{ loading ? 'Saving...' : '保存设置' }}
@@ -36,14 +80,23 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useDataStore } from '../stores/data';
 import { useAuthStore } from '../stores/auth';
 
 const dataStore = useDataStore();
 const authStore = useAuthStore();
-const form = ref({ hero_title: '', hero_subtitle: '', hero_description: '', site_name: '', site_tagline: '' });
+const form = ref({ hero_title: '', hero_subtitle: '', hero_description: '', site_name: '', site_tagline: '', default_icon: '' });
 const loading = ref(false);
+
+// 默认图标预览URL计算
+const defaultIconPreviewUrl = computed(() => {
+    if (!form.value.default_icon) return '';
+    if (form.value.default_icon.startsWith('http') || form.value.default_icon.startsWith('/')) {
+        return form.value.default_icon;
+    }
+    return ''; // FontAwesome类名，不返回URL
+});
 
 onMounted(async () => {
     // Ensure settings are loaded
@@ -66,3 +119,4 @@ const handleSubmit = async () => {
     }
 }
 </script>
+
