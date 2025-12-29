@@ -92,9 +92,11 @@
 import { ref, onMounted } from 'vue';
 import { useDataStore } from '../stores/data';
 import { useAuthStore } from '../stores/auth';
+import { useNotificationStore } from '../stores/notification';
 
 const dataStore = useDataStore();
 const authStore = useAuthStore();
+const notification = useNotificationStore();
 
 const tags = ref([]);
 const showAddModal = ref(false);
@@ -122,7 +124,7 @@ const loadTags = async () => {
     try {
         tags.value = await dataStore.fetchAdminTags(authStore.token);
     } catch (e) {
-        alert('加载标签失败: ' + e.message);
+        notification.error('加载标签失败: ' + e.message);
     }
 };
 
@@ -132,12 +134,20 @@ const editTag = (tag) => {
 };
 
 const deleteTag = async (id) => {
-    if (!confirm('确定要删除这个标签吗？关联到此标签的项目会解除关联。')) return;
+    const confirmed = await notification.confirm({
+        title: '删除确认',
+        message: '确定要删除这个标签吗？关联到此标签的项目会解除关联。',
+        type: 'danger',
+        confirmText: '删除',
+        cancelText: '取消'
+    });
+    if (!confirmed) return;
     try {
         await dataStore.deleteTag(authStore.token, id);
+        notification.success('标签已删除');
         await loadTags();
     } catch (e) {
-        alert('删除失败: ' + e.message);
+        notification.error('删除失败: ' + e.message);
     }
 };
 
@@ -151,13 +161,15 @@ const handleSubmit = async () => {
     try {
         if (editingTag.value) {
             await dataStore.updateTag(authStore.token, editingTag.value.id, form.value);
+            notification.success('标签已更新');
         } else {
             await dataStore.createTag(authStore.token, form.value);
+            notification.success('标签已创建');
         }
         await loadTags();
         closeModal();
     } catch (e) {
-        alert('保存失败: ' + e.message);
+        notification.error('保存失败: ' + e.message);
     }
 };
 </script>

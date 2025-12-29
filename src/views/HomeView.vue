@@ -229,9 +229,11 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import MainLayout from '../layouts/MainLayout.vue';
 import { useDataStore } from '../stores/data';
+import { useNotificationStore } from '../stores/notification';
 import { storeToRefs } from 'pinia';
 
 const dataStore = useDataStore();
+const notification = useNotificationStore();
 const { groupedItems, loading, error, categories, settings, friendLinks } = storeToRefs(dataStore);
 const searchQuery = ref('');
 const sortBy = ref('default');
@@ -253,17 +255,17 @@ const feedbackSubmitting = ref(false);
 // 提交反馈
 const handleFeedbackSubmit = async () => {
     if (!feedbackForm.value.content.trim()) {
-        alert('请输入反馈内容');
+        notification.warning('请输入反馈内容');
         return;
     }
     feedbackSubmitting.value = true;
     try {
         await dataStore.submitFeedback(feedbackForm.value);
-        alert('反馈提交成功，感谢您的建议！');
+        notification.success('反馈提交成功，感谢您的建议！');
         showFeedbackModal.value = false;
         feedbackForm.value = { email: '', content: '' };
     } catch (e) {
-        alert('提交失败: ' + e.message);
+        notification.error('提交失败: ' + e.message);
     } finally {
         feedbackSubmitting.value = false;
     }
@@ -328,13 +330,11 @@ const getSortLabel = (sort) => {
 const handleSubmit = async () => {
     try {
         await dataStore.submitItem(submitForm.value);
-        alert('提交成功！等待管理员审核。');
+        notification.success('提交成功！等待管理员审核。');
         showSubmitModal.value = false;
         submitForm.value = { name: '', url: '', category_id: null, description: '' };
     } catch (e) {
-        alert('提交失败: ' + e.message);
-
-
+        notification.error('提交失败: ' + e.message);
     }
 }
 

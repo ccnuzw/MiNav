@@ -106,9 +106,11 @@
 import { ref, watch, onMounted, computed } from 'vue'
 import { useDataStore } from '../stores/data'
 import { useAuthStore } from '../stores/auth'
+import { useNotificationStore } from '../stores/notification'
 
 const dataStore = useDataStore()
 const authStore = useAuthStore()
+const notification = useNotificationStore()
 
 const feedbacks = ref([])
 const loading = ref(false)
@@ -129,7 +131,7 @@ const fetchData = async () => {
     unreadCount.value = result.unread || 0
   } catch (e) {
     console.error('获取反馈失败', e)
-    alert('获取反馈失败: ' + e.message)
+    notification.error('获取反馈失败: ' + e.message)
   } finally {
     loading.value = false
   }
@@ -138,28 +140,38 @@ const fetchData = async () => {
 const markAsRead = async (id) => {
   try {
     await dataStore.updateFeedbackStatus(authStore.token, id, 'read')
+    notification.success('已标记为已读')
     fetchData()
   } catch (e) {
-    alert('操作失败: ' + e.message)
+    notification.error('操作失败: ' + e.message)
   }
 }
 
 const markAsPending = async (id) => {
   try {
     await dataStore.updateFeedbackStatus(authStore.token, id, 'pending')
+    notification.success('已标记为未读')
     fetchData()
   } catch (e) {
-    alert('操作失败: ' + e.message)
+    notification.error('操作失败: ' + e.message)
   }
 }
 
 const handleDelete = async (id) => {
-  if (!confirm('确定要删除这条反馈吗？')) return
+  const confirmed = await notification.confirm({
+    title: '删除确认',
+    message: '确定要删除这条反馈吗？',
+    type: 'danger',
+    confirmText: '删除',
+    cancelText: '取消'
+  })
+  if (!confirmed) return
   try {
     await dataStore.deleteFeedback(authStore.token, id)
+    notification.success('反馈已删除')
     fetchData()
   } catch (e) {
-    alert('删除失败: ' + e.message)
+    notification.error('删除失败: ' + e.message)
   }
 }
 

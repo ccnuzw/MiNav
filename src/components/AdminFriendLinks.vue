@@ -100,10 +100,12 @@
 import { ref, computed, onMounted } from 'vue';
 import { useDataStore } from '../stores/data';
 import { useAuthStore } from '../stores/auth';
+import { useNotificationStore } from '../stores/notification';
 
 const links = ref([]);
 const dataStore = useDataStore();
 const authStore = useAuthStore();
+const notification = useNotificationStore();
 
 const showAddModal = ref(false);
 const editingLink = ref(null);
@@ -122,7 +124,7 @@ const iconPreviewUrl = computed(() => {
 // 自动获取图标
 const autoFetchIcon = (service) => {
     if (!form.value.url) {
-        alert('请先输入友链链接');
+        notification.warning('请先输入友链链接');
         return;
     }
     try {
@@ -139,8 +141,9 @@ const autoFetchIcon = (service) => {
                 break;
         }
         iconPreviewError.value = false;
+        notification.success('图标已获取');
     } catch {
-        alert('链接格式不正确');
+        notification.error('链接格式不正确');
     }
 };
 
@@ -163,9 +166,21 @@ const editLink = (link) => {
 }
 
 const deleteLink = async (id) => {
-    if(!confirm('确定要删除这个友链吗?')) return;
-    await dataStore.deleteFriendLink(authStore.token, id);
-    await loadLinks();
+    const confirmed = await notification.confirm({
+        title: '删除确认',
+        message: '确定要删除这个友链吗？',
+        type: 'danger',
+        confirmText: '删除',
+        cancelText: '取消'
+    });
+    if (!confirmed) return;
+    try {
+        await dataStore.deleteFriendLink(authStore.token, id);
+        notification.success('友链已删除');
+        await loadLinks();
+    } catch (e) {
+        notification.error('删除失败: ' + e.message);
+    }
 }
 
 const closeModal = () => {
@@ -175,12 +190,18 @@ const closeModal = () => {
 }
 
 const handleSubmit = async () => {
-    if (editingLink.value) {
-        await dataStore.updateFriendLink(authStore.token, editingLink.value.id, form.value);
-    } else {
-        await dataStore.createFriendLink(authStore.token, form.value);
+    try {
+        if (editingLink.value) {
+            await dataStore.updateFriendLink(authStore.token, editingLink.value.id, form.value);
+            notification.success('友链已更新');
+        } else {
+            await dataStore.createFriendLink(authStore.token, form.value);
+            notification.success('友链已创建');
+        }
+        closeModal();
+        await loadLinks();
+    } catch (e) {
+        notification.error('操作失败: ' + e.message);
     }
-    closeModal();
-    await loadLinks();
 }
 </script>

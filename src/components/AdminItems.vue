@@ -173,6 +173,7 @@
 import { ref, computed, onMounted, watch } from 'vue';
 import { useDataStore } from '../stores/data';
 import { useAuthStore } from '../stores/auth';
+import { useNotificationStore } from '../stores/notification';
 
 const props = defineProps(['categories']);
 const items = ref([]);
@@ -182,6 +183,7 @@ const limit = ref(20);
 
 const dataStore = useDataStore();
 const authStore = useAuthStore();
+const notification = useNotificationStore();
 
 // 获取项目图标类型
 const getItemIconType = (item) => {
@@ -214,7 +216,7 @@ const iconPreviewUrl = computed(() => {
 // 自动获取图标
 const autoFetchIcon = (service) => {
     if (!form.value.url) {
-        alert('请先输入项目链接');
+        notification.warning('请先输入项目链接');
         return;
     }
     try {
@@ -231,8 +233,9 @@ const autoFetchIcon = (service) => {
                 break;
         }
         iconPreviewError.value = false;
+        notification.success('图标已获取');
     } catch {
-        alert('链接格式不正确');
+        notification.error('链接格式不正确');
     }
 };
 
@@ -284,9 +287,21 @@ const editItem = (item) => {
 }
 
 const deleteItem = async (id) => {
-    if(!confirm('确定要删除这个项目吗?')) return;
-    await dataStore.deleteItem(authStore.token, id);
-    await loadItems();
+    const confirmed = await notification.confirm({
+        title: '删除确认',
+        message: '确定要删除这个项目吗？此操作不可撤销。',
+        type: 'danger',
+        confirmText: '删除',
+        cancelText: '取消'
+    });
+    if (!confirmed) return;
+    try {
+        await dataStore.deleteItem(authStore.token, id);
+        notification.success('项目已删除');
+        await loadItems();
+    } catch (e) {
+        notification.error('删除失败: ' + e.message);
+    }
 }
 
 const closeModal = () => {
@@ -296,12 +311,18 @@ const closeModal = () => {
 }
 
 const handleSubmit = async () => {
-    if (editingItem.value) {
-        await dataStore.updateItem(authStore.token, editingItem.value.id, form.value);
-    } else {
-        await dataStore.createItem(authStore.token, form.value);
+    try {
+        if (editingItem.value) {
+            await dataStore.updateItem(authStore.token, editingItem.value.id, form.value);
+            notification.success('项目已更新');
+        } else {
+            await dataStore.createItem(authStore.token, form.value);
+            notification.success('项目已创建');
+        }
+        closeModal();
+        await loadItems();
+    } catch (e) {
+        notification.error('操作失败: ' + e.message);
     }
-    closeModal();
-    await loadItems();
 }
 </script>

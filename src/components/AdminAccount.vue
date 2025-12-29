@@ -15,12 +15,9 @@
             <input v-model="form.confirmPassword" type="password" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" required />
         </div>
         
-        <div v-if="error" class="text-red-500 text-sm">{{ error }}</div>
-        <div v-if="success" class="text-green-500 text-sm">{{ success }}</div>
-
         <div class="flex justify-end pt-4">
             <button type="submit" :disabled="loading" class="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover transition disabled:opacity-50">
-                {{ loading ? 'Updating...' : '修改密码' }}
+                {{ loading ? '更新中...' : '修改密码' }}
             </button>
         </div>
     </form>
@@ -30,34 +27,31 @@
 <script setup>
 import { ref } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { useNotificationStore } from '../stores/notification';
 
 const authStore = useAuthStore();
+const notification = useNotificationStore();
 const form = ref({ oldPassword: '', newPassword: '', confirmPassword: '' });
-const error = ref('');
-const success = ref('');
 const loading = ref(false);
 
 const handleSubmit = async () => {
-    error.value = '';
-    success.value = '';
-
     if (form.value.newPassword !== form.value.confirmPassword) {
-        error.value = 'New passwords do not match';
+        notification.warning('两次输入的新密码不一致');
         return;
     }
 
     if (form.value.newPassword.length < 6) {
-         error.value = 'Password must be at least 6 characters';
-         return;
+        notification.warning('密码长度至少为 6 位');
+        return;
     }
 
     loading.value = true;
     try {
         await authStore.changePassword(form.value.oldPassword, form.value.newPassword);
-        success.value = 'Password updated successfully';
+        notification.success('密码修改成功');
         form.value = { oldPassword: '', newPassword: '', confirmPassword: '' };
     } catch (e) {
-        error.value = e.message;
+        notification.error('修改失败: ' + e.message);
     } finally {
         loading.value = false;
     }

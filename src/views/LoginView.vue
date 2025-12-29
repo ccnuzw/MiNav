@@ -20,19 +20,22 @@
 <script setup>
 import { ref } from 'vue';
 import { useAuthStore } from '../stores/auth';
+import { useNotificationStore } from '../stores/notification';
 import { useRouter } from 'vue-router';
 
 const username = ref('');
 const password = ref('');
 const authStore = useAuthStore();
+const notification = useNotificationStore();
 const router = useRouter();
 
 const handleLogin = async () => {
     try {
         await authStore.login(username.value, password.value);
+        notification.success('登录成功！');
         router.push('/admin');
     } catch (e) {
-        alert('Login failed');
+        notification.error('登录失败，请检查用户名和密码');
     }
 }
 </script>

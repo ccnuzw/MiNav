@@ -91,6 +91,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useDataStore } from '../stores/data';
 import { useAuthStore } from '../stores/auth';
+import { useNotificationStore } from '../stores/notification';
 
 // 扩展的图标列表
 const predefinedIcons = [
@@ -132,6 +133,7 @@ const filteredIcons = computed(() => {
 const categories = ref([]);
 const dataStore = useDataStore();
 const authStore = useAuthStore();
+const notification = useNotificationStore();
 
 const showAddModal = ref(false);
 const isEditing = ref(false);
@@ -169,21 +171,39 @@ const openEditModal = (cat) => {
 }
 
 const deleteCategory = async (id) => {
-    if(!confirm('确定要删除这个分类吗?')) return;
-    await dataStore.deleteCategory(authStore.token, id);
-    await loadCategories();
+    const confirmed = await notification.confirm({
+        title: '删除确认',
+        message: '确定要删除这个分类吗？此操作不可撤销。',
+        type: 'danger',
+        confirmText: '删除',
+        cancelText: '取消'
+    });
+    if (!confirmed) return;
+    try {
+        await dataStore.deleteCategory(authStore.token, id);
+        notification.success('分类已删除');
+        await loadCategories();
+    } catch (e) {
+        notification.error('删除失败: ' + e.message);
+    }
 }
 
 const handleSubmit = async () => {
-    if (isEditing.value) {
-        await dataStore.updateCategory(authStore.token, editingId.value, form.value);
-    } else {
-        await dataStore.createCategory(authStore.token, form.value);
+    try {
+        if (isEditing.value) {
+            await dataStore.updateCategory(authStore.token, editingId.value, form.value);
+            notification.success('分类已更新');
+        } else {
+            await dataStore.createCategory(authStore.token, form.value);
+            notification.success('分类已创建');
+        }
+        showAddModal.value = false;
+        form.value = { name: '', icon: '', sort_order: 0, description: '' };
+        isEditing.value = false;
+        editingId.value = null;
+        await loadCategories();
+    } catch (e) {
+        notification.error('操作失败: ' + e.message);
     }
-    showAddModal.value = false;
-    form.value = { name: '', icon: '', sort_order: 0, description: '' };
-    isEditing.value = false;
-    editingId.value = null;
-    await loadCategories();
 }
 </script>
