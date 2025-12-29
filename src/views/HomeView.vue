@@ -22,12 +22,10 @@
             <a class="flex items-center text-primary dark:text-accent hover:underline cursor-pointer" @click="showSubmitModal = true">
                 提交工具 <span class="ml-1">👉</span>
             </a>
-            <template v-if="settings.feedback_enabled !== 'false'">
-                <span class="text-gray-300 dark:text-gray-600">|</span>
-                <a class="flex items-center text-primary dark:text-accent hover:underline cursor-pointer" @click="showFeedbackModal = true">
-                    意见反馈 <span class="ml-1">👉</span>
-                </a>
-            </template>
+            <span class="text-gray-300 dark:text-gray-600">|</span>
+            <a class="flex items-center text-primary dark:text-accent hover:underline cursor-pointer" @click="handleFeedbackClick">
+                意见反馈 <span class="ml-1">👉</span>
+            </a>
         </div>
     </div>
 
@@ -158,10 +156,10 @@
         <button @click="scrollToTop" class="w-12 h-12 bg-primary dark:bg-accent rounded-lg shadow-lg flex items-center justify-center text-white hover:bg-primary-hover dark:hover:bg-accent-dark transition transform hover:scale-105">
             <i class="fas fa-chevron-up"></i>
         </button>
-        <!-- Mock Ghost Button -->
-        <button class="w-12 h-12 bg-indigo-500 rounded-full shadow-lg flex items-center justify-center text-white hover:bg-indigo-600 transition transform hover:scale-105">
-            <i class="fas fa-ghost"></i>
-        </button>
+        <!-- 登录按钮 -->
+        <router-link to="/login" class="w-12 h-12 bg-gradient-to-br from-primary to-primary-hover dark:from-accent dark:to-accent-dark rounded-full shadow-lg flex items-center justify-center text-white hover:shadow-xl transition transform hover:scale-105">
+            <i class="fas fa-user"></i>
+        </router-link>
     </div>
 </teleport>
 
@@ -283,6 +281,14 @@ const feedbackSubmitting = ref(false);
 // 反馈验证码
 const feedbackCaptcha = useMathCaptcha();
 const feedbackCaptchaQuestion = computed(() => feedbackCaptcha.captchaQuestion.value);
+
+const handleFeedbackClick = () => {
+    if (settings.value.feedback_enabled === 'false') {
+        notification.warning('意见反馈功能已关闭');
+        return;
+    }
+    showFeedbackModal.value = true;
+}
 
 // 提交反馈
 const handleFeedbackSubmit = async () => {

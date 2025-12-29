@@ -12,15 +12,11 @@
             </div>
         </div>
         <div class="flex items-center space-x-6 text-xl">
-            <a class="text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-accent transition" href="#"><i class="fab fa-github"></i></a>
-            <a class="text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-accent transition" href="#"><i class="fab fa-twitter"></i></a>
+            <a class="text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-accent transition" href="https://github.com/ccnuzw/MiNav" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
             <button class="text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-accent transition" @click="toggleDarkMode">
                 <i class="fas fa-moon dark:hidden"></i>
                 <i class="fas fa-sun hidden dark:inline"></i>
             </button>
-            <router-link to="/login" class="text-sm font-medium text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-accent transition">
-               登录
-            </router-link>
         </div>
     </header>
 
