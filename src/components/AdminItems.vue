@@ -1,9 +1,29 @@
 <template>
   <div class="bg-white dark:bg-dark-card p-6 rounded-lg shadow">
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+    <!-- Mobile Header -->
+    <div class="flex flex-col md:hidden gap-4 mb-6">
+        <div class="flex justify-between items-center gap-3">
+            <h2 class="text-xl font-bold dark:text-white whitespace-nowrap">项目管理</h2>
+            <select v-model="filterCategoryId" @change="resetAndLoad" class="flex-1 border rounded px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                <option value="all">所有分类</option>
+                <option v-for="cat in categories.filter(c => c.name !== '全部项目')" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+            </select>
+        </div>
+        <div class="flex gap-2">
+            <button @click="showIconMatchModal = true" class="flex-1 px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition whitespace-nowrap text-sm flex items-center justify-center">
+                <i class="fas fa-magic mr-1"></i>匹配图标
+            </button>
+            <button @click="showAddModal = true" class="flex-1 px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover transition whitespace-nowrap flex items-center justify-center">
+                添加项目
+            </button>
+        </div>
+    </div>
+
+    <!-- Desktop Header -->
+    <div class="hidden md:flex justify-between items-center mb-6 gap-4">
         <h2 class="text-xl font-bold dark:text-white">项目管理</h2>
-        <div class="flex items-center space-x-2 w-full md:w-auto">
-            <select v-model="filterCategoryId" @change="resetAndLoad" class="flex-1 md:flex-none border rounded px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+        <div class="flex items-center space-x-2">
+            <select v-model="filterCategoryId" @change="resetAndLoad" class="border rounded px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white w-48">
                 <option value="all">所有分类</option>
                 <option v-for="cat in categories.filter(c => c.name !== '全部项目')" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
             </select>
@@ -132,84 +152,87 @@
     </div>
 
     <!-- Modal (Simplified) -->
-    <div v-if="showAddModal || editingItem" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-dark-card p-6 rounded-lg w-full max-w-md">
-            <h3 class="text-lg font-bold mb-4 dark:text-white">{{ editingItem ? '编辑项目' : '添加项目' }}</h3>
-            <form @submit.prevent="handleSubmit" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium dark:text-gray-300">名称</label>
-                    <input v-model="form.name" type="text" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" required />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium dark:text-gray-300">链接</label>
-                    <input v-model="form.url" type="url" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" required />
-                </div>
-                <div>
-                    <label class="block text-sm font-medium dark:text-gray-300">分类</label>
-                    <select v-model="form.category_id" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
-                        <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
-                    </select>
-                </div>
-                 <div>
-                    <label class="block text-sm font-medium dark:text-gray-300">描述</label>
-                    <textarea v-model="form.description" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white"></textarea>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium dark:text-gray-300 mb-2">图标</label>
-                    <div class="flex items-start gap-4">
-                        <!-- 图标预览 -->
-                        <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600 flex-shrink-0">
-                            <img v-if="iconPreviewUrl" :src="iconPreviewUrl" alt="图标预览" class="w-full h-full object-cover" @error="iconPreviewError = true" />
-                            <i v-else-if="form.icon && !form.icon.startsWith('http')" :class="form.icon" class="text-2xl text-gray-500"></i>
-                            <span v-else class="text-gray-400 text-xs text-center">预览</span>
-                        </div>
-                        <div class="flex-1 space-y-2">
-                            <input v-model="form.icon" type="text" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white text-sm" placeholder="图标URL、FontAwesome类名 或 留空自动获取" />
-                            <!-- 快捷操作 -->
-                            <div class="flex flex-wrap gap-2">
-                                <button type="button" @click="autoFetchIcon('unavatar')" class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 transition">
-                                    <i class="fas fa-magic mr-1"></i>Unavatar
-                                </button>
-                                <button type="button" @click="autoFetchIcon('clearbit')" class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded hover:bg-green-200 dark:hover:bg-green-900/50 transition">
-                                    <i class="fas fa-building mr-1"></i>Clearbit
-                                </button>
-                                <button type="button" @click="autoFetchIcon('iconhorse')" class="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition">
-                                    <i class="fas fa-horse mr-1"></i>Icon Horse
-                                </button>
-                                <button type="button" @click="form.icon = ''" class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition">
-                                    <i class="fas fa-undo mr-1"></i>使用默认
-                                </button>
+    <!-- Modal (Simplified) -->
+    <div v-if="showAddModal || editingItem" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div class="bg-white dark:bg-dark-card rounded-lg w-full max-w-md flex flex-col max-h-[90vh] shadow-xl">
+            <div class="p-6 overflow-y-auto custom-scrollbar">
+                <h3 class="text-lg font-bold mb-4 dark:text-white">{{ editingItem ? '编辑项目' : '添加项目' }}</h3>
+                <form @submit.prevent="handleSubmit" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium dark:text-gray-300">名称</label>
+                        <input v-model="form.name" type="text" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" required />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium dark:text-gray-300">链接</label>
+                        <input v-model="form.url" type="url" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" required />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium dark:text-gray-300">分类</label>
+                        <select v-model="form.category_id" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                            <option v-for="cat in categories" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
+                        </select>
+                    </div>
+                     <div>
+                        <label class="block text-sm font-medium dark:text-gray-300">描述</label>
+                        <textarea v-model="form.description" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium dark:text-gray-300 mb-2">图标</label>
+                        <div class="flex items-start gap-4">
+                            <!-- 图标预览 -->
+                            <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden border-2 border-dashed border-gray-300 dark:border-gray-600 flex-shrink-0">
+                                <img v-if="iconPreviewUrl" :src="iconPreviewUrl" alt="图标预览" class="w-full h-full object-cover" @error="iconPreviewError = true" />
+                                <i v-else-if="form.icon && !form.icon.startsWith('http')" :class="form.icon" class="text-2xl text-gray-500"></i>
+                                <span v-else class="text-gray-400 text-xs text-center">预览</span>
                             </div>
-                            <p class="text-xs text-gray-400">留空将自动从网站获取图标 | 支持 FontAwesome 类名如 <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">fab fa-github</code></p>
+                            <div class="flex-1 space-y-2">
+                                <input v-model="form.icon" type="text" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white text-sm" placeholder="图标URL、FontAwesome类名 或 留空自动获取" />
+                                <!-- 快捷操作 -->
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" @click="autoFetchIcon('unavatar')" class="text-xs px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 transition">
+                                        <i class="fas fa-magic mr-1"></i>Unavatar
+                                    </button>
+                                    <button type="button" @click="autoFetchIcon('clearbit')" class="text-xs px-2 py-1 bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400 rounded hover:bg-green-200 dark:hover:bg-green-900/50 transition">
+                                        <i class="fas fa-building mr-1"></i>Clearbit
+                                    </button>
+                                    <button type="button" @click="autoFetchIcon('iconhorse')" class="text-xs px-2 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded hover:bg-purple-200 dark:hover:bg-purple-900/50 transition">
+                                        <i class="fas fa-horse mr-1"></i>Icon Horse
+                                    </button>
+                                    <button type="button" @click="form.icon = ''" class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                                        <i class="fas fa-undo mr-1"></i>使用默认
+                                    </button>
+                                </div>
+                                <p class="text-xs text-gray-400">留空将自动从网站获取图标 | 支持 FontAwesome 类名如 <code class="bg-gray-100 dark:bg-gray-700 px-1 rounded">fab fa-github</code></p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                 <div>
-                    <label class="block text-sm font-medium dark:text-gray-300">排序 (Sort Order)</label>
-                    <input v-model="form.sort_order" type="number" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" />
-                </div>
-                 <div>
-                    <label class="block text-sm font-medium dark:text-gray-300">状态</label>
-                    <select v-model="form.status" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
-                        <option value="active">启用</option>
-                        <option value="inactive">禁用</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium dark:text-gray-300 mb-2">标签</label>
-                    <div class="flex flex-wrap gap-2 p-3 border rounded dark:border-gray-600 bg-gray-50 dark:bg-gray-800 max-h-32 overflow-y-auto">
-                        <label v-for="tag in allTags" :key="tag.id" class="inline-flex items-center cursor-pointer">
-                            <input type="checkbox" :value="tag.id" v-model="form.tag_ids" class="form-checkbox h-4 w-4 rounded border-gray-300 dark:border-gray-600" :style="{ accentColor: tag.color }" />
-                            <span class="ml-1.5 text-sm px-2 py-0.5 rounded-full text-white" :style="{ backgroundColor: tag.color }">{{ tag.name }}</span>
-                        </label>
-                        <span v-if="allTags.length === 0" class="text-gray-400 text-sm">暂无标签，请先在标签管理中创建</span>
+                     <div>
+                        <label class="block text-sm font-medium dark:text-gray-300">排序 (Sort Order)</label>
+                        <input v-model="form.sort_order" type="number" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" />
                     </div>
-                </div>
-                <div class="flex justify-end space-x-2 mt-4">
-                    <button type="button" @click="closeModal" class="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400">取消</button>
-                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded">保存</button>
-                </div>
-            </form>
+                     <div>
+                        <label class="block text-sm font-medium dark:text-gray-300">状态</label>
+                        <select v-model="form.status" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+                            <option value="active">启用</option>
+                            <option value="inactive">禁用</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium dark:text-gray-300 mb-2">标签</label>
+                        <div class="flex flex-wrap gap-2 p-3 border rounded dark:border-gray-600 bg-gray-50 dark:bg-gray-800 max-h-32 overflow-y-auto">
+                            <label v-for="tag in allTags" :key="tag.id" class="inline-flex items-center cursor-pointer">
+                                <input type="checkbox" :value="tag.id" v-model="form.tag_ids" class="form-checkbox h-4 w-4 rounded border-gray-300 dark:border-gray-600" :style="{ accentColor: tag.color }" />
+                                <span class="ml-1.5 text-sm px-2 py-0.5 rounded-full text-white" :style="{ backgroundColor: tag.color }">{{ tag.name }}</span>
+                            </label>
+                            <span v-if="allTags.length === 0" class="text-gray-400 text-sm">暂无标签，请先在标签管理中创建</span>
+                        </div>
+                    </div>
+                    <div class="flex justify-end space-x-2 mt-4">
+                        <button type="button" @click="closeModal" class="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400">取消</button>
+                        <button type="submit" class="px-4 py-2 bg-primary text-white rounded">保存</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 

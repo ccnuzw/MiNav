@@ -65,22 +65,20 @@
             </span>
           </label>
           <div class="flex gap-2">
-            <div class="flex-1 flex items-center gap-2">
-              <div class="flex-shrink-0 px-4 py-3 bg-gray-100 dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-xl text-gray-700 dark:text-gray-200 font-mono text-center min-w-[120px]">
-                {{ captchaQuestion }}
-              </div>
-              <input 
-                v-model="captcha.userAnswer.value" 
-                type="number" 
-                class="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-dark-border bg-white/50 dark:bg-dark-bg/50 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500" 
-                placeholder="答案"
-                required 
-              />
+            <div class="flex-shrink-0 px-4 py-3 bg-gray-100 dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-xl text-gray-700 dark:text-gray-200 font-mono text-center min-w-[80px]">
+              {{ captchaQuestion }}
             </div>
+            <input 
+              v-model="captcha.userAnswer.value" 
+              type="number" 
+              class="flex-1 min-w-0 px-4 py-3 rounded-xl border border-gray-300 dark:border-dark-border bg-white/50 dark:bg-dark-bg/50 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500" 
+              placeholder="答案"
+              required 
+            />
             <button 
               type="button"
               @click="captcha.generateCaptcha()"
-              class="px-3 py-3 bg-gray-100 dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+              class="flex-shrink-0 px-3 py-3 bg-gray-100 dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition"
               title="刷新验证码"
             >
               <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">

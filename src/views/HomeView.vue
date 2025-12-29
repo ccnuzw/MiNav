@@ -190,22 +190,20 @@
                  <div>
                     <label class="block text-sm font-medium dark:text-gray-300 mb-1.5">验证码 <span class="text-red-500">*</span></label>
                     <div class="flex gap-2">
-                        <div class="flex-1 flex items-center gap-2">
-                            <div class="flex-shrink-0 px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-200 font-mono text-center min-w-[100px]">
-                                {{ submitCaptchaQuestion }}
-                            </div>
-                            <input 
-                                v-model="submitCaptcha.userAnswer.value" 
-                                type="number" 
-                                class="flex-1 border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" 
-                                placeholder="答案"
-                                required 
-                            />
+                        <div class="flex-shrink-0 px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-200 font-mono text-center min-w-[80px]">
+                            {{ submitCaptchaQuestion }}
                         </div>
+                        <input 
+                            v-model="submitCaptcha.userAnswer.value" 
+                            type="number" 
+                            class="flex-1 min-w-0 border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" 
+                            placeholder="答案"
+                            required 
+                        />
                         <button 
                             type="button"
                             @click="submitCaptcha.generateCaptcha()"
-                            class="px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                            class="flex-shrink-0 px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition"
                             title="刷新验证码"
                         >
                             <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -241,22 +239,20 @@
                 <div>
                     <label class="block text-sm font-medium dark:text-gray-300 mb-1.5">验证码 <span class="text-red-500">*</span></label>
                     <div class="flex gap-2">
-                        <div class="flex-1 flex items-center gap-2">
-                            <div class="flex-shrink-0 px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-200 font-mono text-center min-w-[100px]">
-                                {{ feedbackCaptchaQuestion }}
-                            </div>
-                            <input 
-                                v-model="feedbackCaptcha.userAnswer.value" 
-                                type="number" 
-                                class="flex-1 border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" 
-                                placeholder="答案"
-                                required 
-                            />
+                        <div class="flex-shrink-0 px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-200 font-mono text-center min-w-[80px]">
+                            {{ feedbackCaptchaQuestion }}
                         </div>
+                        <input 
+                            v-model="feedbackCaptcha.userAnswer.value" 
+                            type="number" 
+                            class="flex-1 min-w-0 border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" 
+                            placeholder="答案"
+                            required 
+                        />
                         <button 
                             type="button"
                             @click="feedbackCaptcha.generateCaptcha()"
-                            class="px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                            class="flex-shrink-0 px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition"
                             title="刷新验证码"
                         >
                             <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
