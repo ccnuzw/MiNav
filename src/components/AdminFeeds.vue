@@ -25,8 +25,8 @@
       </div>
     </div>
 
-    <!-- Feed List -->
-    <div class="overflow-x-auto">
+    <!-- Feed List (Desktop Table) -->
+    <div class="hidden md:block overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-dark-border">
@@ -81,6 +81,40 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Mobile Feed Cards -->
+    <div class="grid grid-cols-1 gap-4 md:hidden">
+        <div v-if="loading" class="text-center py-4 text-gray-500">加载中...</div>
+        <div v-else-if="feeds.length === 0" class="text-center py-4 text-gray-500">暂无订阅源，请添加</div>
+        <div 
+            v-else
+            v-for="feed in feeds" 
+            :key="feed.id" 
+            class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative"
+        >
+            <div class="flex justify-between items-start mb-2 gap-2">
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-bold text-gray-900 dark:text-white break-all leading-tight mb-1">{{ feed.name }}</h4>
+                    <div class="text-xs text-gray-500 break-all">{{ feed.url }}</div>
+                </div>
+                 <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 whitespace-nowrap">
+                    活跃
+                 </span>
+            </div>
+            
+            <div class="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-gray-700 mt-2">
+                 <div class="text-xs text-gray-400">上次同步: {{ formatTime(feed.last_sync) || '从未' }}</div>
+                 <div class="space-x-2">
+                    <button @click="openEditModal(feed)" class="px-3 py-1 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition">
+                        编辑
+                    </button>
+                    <button @click="deleteFeed(feed.id)" class="px-3 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition">
+                        删除
+                    </button>
+                 </div>
+            </div>
+        </div>
     </div>
 
     <!-- Add/Edit Feed Modal -->
@@ -203,7 +237,15 @@ const saveFeed = async () => {
 };
 
 const deleteFeed = async (id) => {
-    if(!confirm('确定删除此订阅源吗？相关已缓存的文章也会被清理。')) return;
+    const confirmed = await notification.confirm({
+        title: '删除确认',
+        message: '确定删除此订阅源吗？相关已缓存的文章也会被清理。',
+        type: 'danger',
+        confirmText: '删除',
+        cancelText: '取消'
+    });
+    if(!confirmed) return;
+
     try {
         const res = await fetch(`/api/admin/feeds/${id}`, {
             method: 'DELETE',

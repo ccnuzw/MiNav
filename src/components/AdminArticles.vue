@@ -26,8 +26,8 @@
         </button>
     </div>
 
-    <!-- Article List -->
-    <div class="overflow-x-auto">
+    <!-- Article List (Desktop Table) -->
+    <div class="hidden md:block overflow-x-auto">
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-dark-border">
@@ -91,6 +91,49 @@
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <!-- Mobile Article Cards -->
+    <div class="grid grid-cols-1 gap-4 md:hidden">
+        <div v-if="loading" class="text-center py-4 text-gray-500">加载中...</div>
+        <div v-else-if="articles.length === 0" class="text-center py-4 text-gray-500">暂无文章</div>
+        <div 
+            v-else
+            v-for="article in articles" 
+            :key="article.id" 
+            class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative"
+        >
+            <div class="flex justify-between items-start mb-2 gap-2">
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-bold text-gray-900 dark:text-white break-all leading-tight mb-1 line-clamp-2">{{ article.title }}</h4>
+                    <div class="text-xs text-gray-500 flex items-center gap-2">
+                        <span>{{ article.source }}</span>
+                        <span>•</span>
+                        <span>{{ formatDate(article.published_at) }}</span>
+                    </div>
+                </div>
+                 <span 
+                    class="px-2 py-0.5 rounded text-xs whitespace-nowrap"
+                    :class="article.status === 'published' ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'"
+                 >
+                    {{ article.status === 'published' ? '已发布' : '草稿' }}
+                 </span>
+            </div>
+            
+            <div class="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-gray-700 mt-2">
+                 <div class="flex items-center">
+                    <input type="checkbox" :value="article.id" v-model="selectedArticles" class="rounded border-gray-300 dark:border-dark-border dark:bg-dark-bg focus:ring-primary text-primary" />
+                 </div>
+                 <div class="space-x-2">
+                    <button @click="openEditModal(article)" class="px-3 py-1 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition">
+                        编辑
+                    </button>
+                    <button @click="deleteArticle(article.id)" class="px-3 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition">
+                        删除
+                    </button>
+                 </div>
+            </div>
+        </div>
     </div>
     
     <!-- Pagination -->
@@ -216,7 +259,7 @@ const isAllSelected = computed(() => {
 const showEditModal = ref(false);
 const isEditing = ref(false);
 const saving = ref(false);
-const showPreview = ref(true); // Default to split view
+const showPreview = ref(false); // Default to split view (false)
 const form = reactive({
     id: null,
     title: '',
