@@ -228,5 +228,47 @@ export const useDataStore = defineStore('data', () => {
         return await res.json()
     }
 
-    return { items, categories, groupedItems, categoryCounts, filters, loading, error, settings, friendLinks, fetchPublicData, fetchAdminItems, createItem, updateItem, deleteItem, fetchAdminCategories, createCategory, updateCategory, deleteCategory, submitItem, fetchSettings, updateSettings, fetchAdminFriendLinks, createFriendLink, updateFriendLink, deleteFriendLink }
+    // Tags Actions
+    async function fetchAdminTags(token) {
+        const res = await fetch('/api/admin/tags', { headers: { Authorization: `Bearer ${token}` } })
+        if (!res.ok) throw new Error('Failed to fetch tags')
+        return await res.json()
+    }
+
+    async function createTag(token, tag) {
+        const res = await fetch('/api/admin/tags', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify(tag)
+        })
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}))
+            throw new Error(data.error || 'Failed to create tag')
+        }
+        return await res.json()
+    }
+
+    async function updateTag(token, id, tag) {
+        const res = await fetch(`/api/admin/tags/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify(tag)
+        })
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}))
+            throw new Error(data.error || 'Failed to update tag')
+        }
+        return await res.json()
+    }
+
+    async function deleteTag(token, id) {
+        const res = await fetch(`/api/admin/tags/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        if (!res.ok) throw new Error('Failed to delete tag')
+        return await res.json()
+    }
+
+    return { items, categories, groupedItems, categoryCounts, filters, loading, error, settings, friendLinks, fetchPublicData, fetchAdminItems, createItem, updateItem, deleteItem, fetchAdminCategories, createCategory, updateCategory, deleteCategory, submitItem, fetchSettings, updateSettings, fetchAdminFriendLinks, createFriendLink, updateFriendLink, deleteFriendLink, fetchAdminTags, createTag, updateTag, deleteTag }
 })

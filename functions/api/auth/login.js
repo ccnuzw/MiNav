@@ -7,10 +7,17 @@ export async function onRequestPost(context) {
         // We'll use Web Crypto API for SHA-256 for a basic level of security.
 
         const db = context.env.MINAV_DB;
+
+        // Debug: check if db is available
+        if (!db) {
+            console.error('[Login] Database not available');
+            return new Response(JSON.stringify({ error: '数据库未配置' }), { status: 500 });
+        }
+
         const user = await db.prepare('SELECT * FROM users WHERE username = ?').bind(username).first();
 
         if (!user) {
-            return new Response(JSON.stringify({ error: 'Invalid credentials' }), { status: 401 });
+            return new Response(JSON.stringify({ error: '用户名或密码错误' }), { status: 401 });
         }
 
         // Verify password (assuming simple SHA-256 hash storage for this example)
@@ -21,7 +28,7 @@ export async function onRequestPost(context) {
         const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 
         if (hashHex !== user.password_hash) {
-            return new Response(JSON.stringify({ error: 'Invalid credentials' }), { status: 401 });
+            return new Response(JSON.stringify({ error: '用户名或密码错误' }), { status: 401 });
         }
 
         // Create Session

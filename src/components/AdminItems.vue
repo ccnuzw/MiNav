@@ -20,6 +20,7 @@
                     <th scope="col" class="px-6 py-3">名称</th>
                     <th scope="col" class="px-6 py-3">链接</th>
                     <th scope="col" class="px-6 py-3">分类</th>
+                    <th scope="col" class="px-6 py-3">标签</th>
                     <th scope="col" class="px-6 py-3">排序</th>
                     <th scope="col" class="px-6 py-3">状态</th>
                     <th scope="col" class="px-6 py-3">操作</th>
@@ -30,6 +31,12 @@
                     <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ item.name }}</td>
                     <td class="px-6 py-4 truncate max-w-xs">{{ item.url }}</td>
                     <td class="px-6 py-4">{{ getCategoryName(item.category_id) }}</td>
+                    <td class="px-6 py-4">
+                        <div class="flex flex-wrap gap-1">
+                            <span v-for="tag in (item.tags || [])" :key="tag.id" class="px-2 py-0.5 text-xs font-medium rounded-full text-white" :style="{ backgroundColor: tag.color }">{{ tag.name }}</span>
+                            <span v-if="!item.tags || item.tags.length === 0" class="text-gray-400 text-xs">无</span>
+                        </div>
+                    </td>
                     <td class="px-6 py-4">{{ item.sort_order }}</td>
                     <td class="px-6 py-4">
                         <span :class="item.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 py-0.5 rounded text-xs">{{ item.status }}</span>
@@ -105,6 +112,16 @@
                         <option value="inactive">禁用</option>
                     </select>
                 </div>
+                <div>
+                    <label class="block text-sm font-medium dark:text-gray-300 mb-2">标签</label>
+                    <div class="flex flex-wrap gap-2 p-3 border rounded dark:border-gray-600 bg-gray-50 dark:bg-gray-800 max-h-32 overflow-y-auto">
+                        <label v-for="tag in allTags" :key="tag.id" class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" :value="tag.id" v-model="form.tag_ids" class="form-checkbox h-4 w-4 rounded border-gray-300 dark:border-gray-600" :style="{ accentColor: tag.color }" />
+                            <span class="ml-1.5 text-sm px-2 py-0.5 rounded-full text-white" :style="{ backgroundColor: tag.color }">{{ tag.name }}</span>
+                        </label>
+                        <span v-if="allTags.length === 0" class="text-gray-400 text-sm">暂无标签，请先在标签管理中创建</span>
+                    </div>
+                </div>
                 <div class="flex justify-end space-x-2 mt-4">
                     <button type="button" @click="closeModal" class="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400">取消</button>
                     <button type="submit" class="px-4 py-2 bg-primary text-white rounded">保存</button>
@@ -131,12 +148,22 @@ const authStore = useAuthStore();
 
 const showAddModal = ref(false);
 const editingItem = ref(null);
-const form = ref({ name: '', url: '', category_id: null, description: '', icon: '', status: 'active', sort_order: 0 });
+const form = ref({ name: '', url: '', category_id: null, description: '', icon: '', status: 'active', sort_order: 0, tag_ids: [] });
 const filterCategoryId = ref('all');
+const allTags = ref([]);
 
 onMounted(async () => {
     await loadItems();
+    await loadTags();
 });
+
+const loadTags = async () => {
+    try {
+        allTags.value = await dataStore.fetchAdminTags(authStore.token);
+    } catch (e) {
+        console.error('Failed to load tags', e);
+    }
+};
 
 const loadItems = async () => {
     try {
@@ -165,8 +192,11 @@ const getCategoryName = (id) => {
 
 const editItem = (item) => {
     editingItem.value = item;
-    form.value = { ...item };
-    showAddModal.value = true; // Use same flag or split
+    form.value = { 
+        ...item, 
+        tag_ids: (item.tags || []).map(t => t.id) 
+    };
+    showAddModal.value = true;
 }
 
 const deleteItem = async (id) => {
@@ -178,7 +208,7 @@ const deleteItem = async (id) => {
 const closeModal = () => {
     showAddModal.value = false;
     editingItem.value = null;
-    form.value = { name: '', url: '', category_id: null, description: '', icon: '', status: 'active', sort_order: 0 };
+    form.value = { name: '', url: '', category_id: null, description: '', icon: '', status: 'active', sort_order: 0, tag_ids: [] };
 }
 
 const handleSubmit = async () => {

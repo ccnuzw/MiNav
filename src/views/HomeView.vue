@@ -80,15 +80,23 @@
                         <i v-else :class="getIconSrc(item)" class="text-xl dark:text-gray-300"></i>
                     </div>
                     <div class="flex-1">
-                        <div class="flex justify-between items-center mb-1">
+                        <div class="flex justify-between items-start mb-1">
                             <h3 class="font-bold text-gray-900 dark:text-white text-lg">
                                 <a :href="item.url" target="_blank" class="hover:text-primary dark:hover:text-accent transition">{{ item.name }}</a>
                             </h3>
-                            <span v-if="item.status === 'active'" class="text-xs px-2 py-0.5 bg-blue-200 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200 rounded-md">Active</span>
                         </div>
                         <p class="text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2">
                             {{ item.description }}
                         </p>
+                        <!-- Tags -->
+                        <div v-if="item.tags && item.tags.length > 0" class="flex flex-wrap gap-1.5">
+                            <span 
+                                v-for="tag in item.tags" 
+                                :key="tag.id" 
+                                class="px-2 py-0.5 text-xs font-medium rounded-full text-white shadow-sm"
+                                :style="{ backgroundColor: tag.color }"
+                            >{{ tag.name }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
