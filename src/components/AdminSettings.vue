@@ -12,6 +12,34 @@
                 <input v-model="form.site_tagline" type="text" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="Cloudflare Tools" />
             </div>
         </div>
+
+        <!-- 站点LOGO設置 -->
+        <div>
+            <label class="block text-sm font-medium mb-2 dark:text-gray-300">站点 LOGO</label>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">设置显示在左上角的网站 LOGO，支持图片 URL 或 FontAwesome 图标</p>
+            <div class="flex items-start gap-4">
+                <!-- LOGO 预览 -->
+                <div class="w-12 h-12 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center overflow-hidden border border-gray-200 dark:border-gray-600 flex-shrink-0">
+                    <img v-if="siteLogoPreviewUrl" :src="siteLogoPreviewUrl" alt="Logo" class="w-full h-full object-contain" />
+                    <i v-else-if="form.site_logo && !form.site_logo.startsWith('http')" :class="form.site_logo" class="text-xl text-gray-700 dark:text-gray-200"></i>
+                    <span v-else class="text-xs text-gray-400">无</span>
+                </div>
+                <div class="flex-1 space-y-2">
+                    <input v-model="form.site_logo" type="text" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white text-sm" placeholder="图标URL 或 FontAwesome类名" />
+                    <div class="flex flex-wrap gap-2">
+                         <button type="button" @click="form.site_logo = 'fas fa-rocket'" class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                            <i class="fas fa-rocket mr-1"></i>火箭
+                        </button>
+                        <button type="button" @click="form.site_logo = 'fas fa-globe'" class="text-xs px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                            <i class="fas fa-globe mr-1"></i>地球
+                        </button>
+                         <button type="button" @click="form.site_logo = ''" class="text-xs px-2 py-1 bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition">
+                            <i class="fas fa-undo mr-1"></i>清空
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
         <hr class="border-gray-200 dark:border-gray-700" />
         <div>
             <label class="block text-sm font-medium mb-1 dark:text-gray-300">主标题 (Hero Title)</label>
@@ -136,7 +164,7 @@ import { useNotificationStore } from '../stores/notification';
 const dataStore = useDataStore();
 const authStore = useAuthStore();
 const notification = useNotificationStore();
-const form = ref({ hero_title: '', hero_subtitle: '', hero_description: '', site_name: '', site_tagline: '', default_icon: '', feedback_enabled: 'true', submit_enabled: 'true' });
+const form = ref({ hero_title: '', hero_subtitle: '', hero_description: '', site_name: '', site_tagline: '', site_logo: '', default_icon: '', feedback_enabled: 'true', submit_enabled: 'true' });
 const loading = ref(false);
 
 // 默认图标预览URL计算
@@ -146,6 +174,15 @@ const defaultIconPreviewUrl = computed(() => {
         return form.value.default_icon;
     }
     return ''; // FontAwesome类名，不返回URL
+});
+
+// 站点图标预览URL计算
+const siteLogoPreviewUrl = computed(() => {
+    if (!form.value.site_logo) return '';
+    if (form.value.site_logo.startsWith('http') || form.value.site_logo.startsWith('/')) {
+        return form.value.site_logo;
+    }
+    return ''; // FontAwesome类名
 });
 
 onMounted(async () => {

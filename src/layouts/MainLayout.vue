@@ -7,12 +7,20 @@
             <button @click="isMobileMenuOpen = true" class="lg:hidden p-2 rounded-md text-gray-600 hover:text-primary hover:bg-gray-100 dark:text-gray-400 dark:hover:text-accent dark:hover:bg-gray-800 transition">
                 <i class="fas fa-bars text-xl"></i>
             </button>
-            <div class="text-2xl font-bold flex flex-col leading-tight">
-                <span class="text-gray-800 dark:text-white">{{ settings.site_name || 'MiNav' }}</span>
-                <span class="flex items-center text-primary dark:text-accent text-sm">
-                    {{ settings.site_tagline || 'Cloudflare Tools' }}
-                    <i class="fas fa-cloud text-primary dark:text-accent ml-1"></i>
-                </span>
+            <div class="flex items-center gap-3">
+                <!-- Custom Logo -->
+                <div v-if="settings.site_logo" class="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 dark:bg-accent/10 overflow-hidden shrink-0">
+                    <img v-if="settings.site_logo.startsWith('http') || settings.site_logo.startsWith('/')" :src="settings.site_logo" alt="Logo" class="w-full h-full object-contain" />
+                    <i v-else :class="settings.site_logo" class="text-xl text-primary dark:text-accent"></i>
+                </div>
+                
+                <div class="text-2xl font-bold flex flex-col leading-tight">
+                    <span class="text-gray-800 dark:text-white">{{ settings.site_name || 'MiNav' }}</span>
+                    <span class="flex items-center text-primary dark:text-accent text-sm">
+                        {{ settings.site_tagline || 'Cloudflare Tools' }}
+                        <i v-if="!settings.site_logo" class="fas fa-cloud text-primary dark:text-accent ml-1"></i>
+                    </span>
+                </div>
             </div>
         </div>
         <div class="flex items-center space-x-6 text-xl">
