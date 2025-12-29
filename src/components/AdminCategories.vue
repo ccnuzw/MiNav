@@ -45,15 +45,29 @@
                     <textarea v-model="form.description" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="分类描述..."></textarea>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium dark:text-gray-300">图标 (Material Symbol)</label>
-                    <div class="grid grid-cols-6 gap-2 mt-2 max-h-40 overflow-y-auto border p-2 rounded dark:border-gray-600">
-                         <button type="button" v-for="icon in predefinedIcons" :key="icon" @click="form.icon = icon" 
-                            :class="form.icon === icon ? 'bg-primary text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
-                            class="p-2 rounded flex items-center justify-center transition">
-                            <span class="material-symbols-outlined">{{ icon }}</span>
-                         </button>
+                    <label class="block text-sm font-medium dark:text-gray-300 mb-2">图标</label>
+                    <div class="flex items-start gap-4 mb-3">
+                        <!-- 图标预览 -->
+                        <div class="w-14 h-14 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0 border-2 border-dashed border-gray-300 dark:border-gray-600">
+                            <span class="material-symbols-outlined text-3xl text-gray-600 dark:text-gray-300">{{ form.icon || 'help' }}</span>
+                        </div>
+                        <div class="flex-1">
+                            <input v-model="iconSearch" type="text" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white text-sm" placeholder="搜索图标..." />
+                            <input v-model="form.icon" type="text" class="w-full border rounded px-3 py-2 mt-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white text-sm" placeholder="图标代码 (如 home, folder, star)" />
+                        </div>
                     </div>
-                    <input v-model="form.icon" type="text" class="w-full border rounded px-3 py-2 mt-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="自定义图标代码 (e.g. home)" />
+                    <!-- 图标列表 -->
+                    <div class="grid grid-cols-8 gap-1.5 max-h-48 overflow-y-auto border p-2 rounded dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+                         <button type="button" v-for="icon in filteredIcons" :key="icon" @click="form.icon = icon" 
+                            :class="form.icon === icon ? 'bg-primary text-white ring-2 ring-primary ring-offset-1' : 'hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300'"
+                            class="p-2 rounded flex items-center justify-center transition" :title="icon">
+                            <span class="material-symbols-outlined text-xl">{{ icon }}</span>
+                         </button>
+                         <p v-if="filteredIcons.length === 0" class="col-span-8 text-center text-gray-400 text-sm py-4">未找到匹配的图标</p>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">
+                        更多图标请访问 <a href="https://fonts.google.com/icons" target="_blank" class="text-primary dark:text-accent hover:underline">Google Material Icons</a>
+                    </p>
                 </div>
                  <div>
                     <label class="block text-sm font-medium dark:text-gray-300">排序</label>
@@ -70,16 +84,46 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useDataStore } from '../stores/data';
 import { useAuthStore } from '../stores/auth';
 
+// 扩展的图标列表
 const predefinedIcons = [
-    'folder', 'image', 'mail', 'link', 'code', 'settings', 'star', 'home', 
-    'cloud', 'database', 'security', 'api', 'terminal', 'search', 'person', 
-    'group', 'work', 'build', 'extension', 'palette', 'public', 'dns', 'vpn_lock',
-    'shopping_cart', 'visibility', 'lock', 'schedule', 'language', 'help'
+    // 常用
+    'folder', 'home', 'star', 'favorite', 'bookmark', 'apps', 'category',
+    // 文件媒体
+    'image', 'photo_library', 'video_library', 'audio_file', 'description', 'article',
+    // 通讯
+    'mail', 'chat', 'forum', 'send', 'notifications', 'campaign',
+    // 链接工具
+    'link', 'attach_file', 'share', 'qr_code', 'short_text',
+    // 开发
+    'code', 'terminal', 'api', 'data_object', 'javascript', 'integration_instructions',
+    // 云存储
+    'cloud', 'cloud_upload', 'cloud_download', 'storage', 'database', 'backup',
+    // 安全
+    'security', 'lock', 'vpn_lock', 'shield', 'verified_user', 'key',
+    // 设置工具
+    'settings', 'build', 'tune', 'extension', 'widgets', 'handyman',
+    // 商业
+    'shopping_cart', 'store', 'payments', 'credit_card', 'receipt', 'analytics',
+    // 社交
+    'person', 'group', 'public', 'language', 'translate', 'travel_explore',
+    // 时间
+    'schedule', 'timer', 'history', 'update', 'event',
+    // 视觉
+    'visibility', 'palette', 'brush', 'design_services', 'auto_awesome',
+    // 其他
+    'search', 'help', 'info', 'support', 'lightbulb', 'emoji_objects', 'rocket_launch', 'bolt'
 ];
+
+const iconSearch = ref('');
+const filteredIcons = computed(() => {
+    if (!iconSearch.value) return predefinedIcons;
+    const query = iconSearch.value.toLowerCase();
+    return predefinedIcons.filter(icon => icon.includes(query));
+});
 
 const categories = ref([]);
 const dataStore = useDataStore();

@@ -22,6 +22,11 @@
                 class="px-4 py-2 rounded-md text-sm font-medium transition"
             >分类管理</button>
             <button 
+                @click="activeTab = 'tags'"
+                :class="activeTab === 'tags' ? 'bg-white dark:bg-dark-card shadow' : ''"
+                class="px-4 py-2 rounded-md text-sm font-medium transition"
+            >标签管理</button>
+            <button 
                 @click="activeTab = 'settings'"
                 :class="activeTab === 'settings' ? 'bg-white dark:bg-dark-card shadow' : ''"
                 class="px-4 py-2 rounded-md text-sm font-medium transition"
@@ -36,11 +41,6 @@
                 :class="activeTab === 'account' ? 'bg-white dark:bg-dark-card shadow' : ''"
                 class="px-4 py-2 rounded-md text-sm font-medium transition"
             >账户安全</button>
-            <button 
-                @click="activeTab = 'tags'"
-                :class="activeTab === 'tags' ? 'bg-white dark:bg-dark-card shadow' : ''"
-                class="px-4 py-2 rounded-md text-sm font-medium transition"
-            >标签管理</button>
         </div>
 
         <div v-if="activeTab === 'items'">
@@ -48,6 +48,9 @@
         </div>
         <div v-if="activeTab === 'categories'">
             <AdminCategories />
+        </div>
+        <div v-if="activeTab === 'tags'">
+            <AdminTags />
         </div>
         <div v-if="activeTab === 'settings'">
             <AdminSettings />
@@ -57,9 +60,6 @@
         </div>
         <div v-if="activeTab === 'account'">
             <AdminAccount />
-        </div>
-        <div v-if="activeTab === 'tags'">
-            <AdminTags />
         </div>
     </div>
   </div>

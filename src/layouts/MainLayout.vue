@@ -39,10 +39,12 @@
             <nav class="space-y-2 mb-8">
                 <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">分类</h4>
                 <a href="#" @click.prevent="scrollToTop" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-primary bg-primary/10 dark:text-accent dark:bg-accent/10 hover:bg-primary/20 dark:hover:bg-accent/20 transition">
+                    <span class="material-symbols-outlined text-lg mr-2">apps</span>
                     全部项目
                     <span class="ml-auto text-xs font-semibold px-2 py-0.5 bg-primary/20 dark:bg-accent/20 rounded-full text-primary dark:text-accent">{{ totalItemsCount }}</span>
                 </a>
                 <a v-for="cat in categories.filter(c => c.name !== '全部项目')" :key="cat.id" :href="'#cat-' + cat.id" @click.prevent="scrollToCategory(cat.id)" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
+                    <span class="material-symbols-outlined text-lg mr-2 text-gray-500 dark:text-gray-400">{{ cat.icon || 'folder' }}</span>
                     {{ cat.name }}
                     <span class="ml-auto text-xs font-semibold px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded-full text-gray-600 dark:text-gray-300">{{ categoryCounts[cat.id] || 0 }}</span>
                 </a>
@@ -66,25 +68,30 @@
             </div>
 
             <div class="space-y-4">
-                <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">部署方式 (Desc match)</h4>
-                <div>
-                     <label class="inline-flex items-center cursor-pointer">
-                        <input type="radio" value="cloudflare" v-model="filters.deploy" class="form-radio h-4 w-4 text-primary dark:text-accent focus:ring-primary dark:focus:ring-accent border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800" />
-                        <span class="ml-2 text-gray-700 dark:text-gray-300 text-sm">Cloudflare</span>
-                    </label>
+                <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">标签筛选</h4>
+                <div class="flex flex-wrap gap-2">
+                    <button 
+                        v-for="tag in tags" 
+                        :key="tag.id"
+                        @click="toggleTagFilter(tag.id)"
+                        class="px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 transform hover:scale-105"
+                        :class="filters.tags.includes(tag.id) 
+                            ? 'text-white shadow-md ring-2 ring-offset-2 ring-offset-white dark:ring-offset-dark-card' 
+                            : 'text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'"
+                        :style="filters.tags.includes(tag.id) ? { backgroundColor: tag.color, ringColor: tag.color } : {}"
+                    >
+                        <i v-if="filters.tags.includes(tag.id)" class="fas fa-check mr-1 text-xs"></i>
+                        {{ tag.name }}
+                    </button>
                 </div>
-                 <div>
-                     <label class="inline-flex items-center cursor-pointer">
-                        <input type="radio" value="vercel" v-model="filters.deploy" class="form-radio h-4 w-4 text-primary dark:text-accent focus:ring-primary dark:focus:ring-accent border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800" />
-                        <span class="ml-2 text-gray-700 dark:text-gray-300 text-sm">Vercel</span>
-                    </label>
-                </div>
-                 <div>
-                     <label class="inline-flex items-center cursor-pointer">
-                        <input type="radio" :value="null" v-model="filters.deploy" class="form-radio h-4 w-4 text-primary dark:text-accent focus:ring-primary dark:focus:ring-accent border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800" />
-                        <span class="ml-2 text-gray-700 dark:text-gray-300 text-sm">All</span>
-                    </label>
-                </div>
+                <p v-if="tags.length === 0" class="text-gray-400 text-sm">暂无标签</p>
+                <button 
+                    v-if="filters.tags.length > 0" 
+                    @click="filters.tags = []" 
+                    class="text-xs text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-accent flex items-center gap-1 mt-2"
+                >
+                    <i class="fas fa-times"></i> 清除全部
+                </button>
             </div>
         </aside>
 
@@ -121,7 +128,7 @@ import { useDataStore } from '../stores/data';
 import { storeToRefs } from 'pinia';
 
 const dataStore = useDataStore();
-const { categories, categoryCounts, items, filters, settings, friendLinks } = storeToRefs(dataStore);
+const { categories, categoryCounts, items, tags, filters, settings, friendLinks } = storeToRefs(dataStore);
 
 const totalItemsCount = computed(() => items.value.length);
 
@@ -149,6 +156,15 @@ const scrollToCategory = (id) => {
     const el = document.getElementById('cat-' + id);
     if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+}
+
+const toggleTagFilter = (tagId) => {
+    const index = filters.value.tags.indexOf(tagId);
+    if (index > -1) {
+        filters.value.tags.splice(index, 1);
+    } else {
+        filters.value.tags.push(tagId);
     }
 }
 </script>

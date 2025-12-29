@@ -49,7 +49,7 @@
              <button @click="quickFilter = 'all'" :class="quickFilter === 'all' ? 'bg-primary dark:bg-accent text-white' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'" class="px-6 py-1.5 rounded shadow-sm text-sm font-medium transition whitespace-nowrap">
                 全部
             </button>
-            <button v-for="cat in categories.filter(c => c.name !== '全部项目').slice(0, 4)" :key="cat.id" @click="quickFilter = cat.id" 
+            <button v-for="cat in topCategories" :key="cat.id" @click="quickFilter = cat.id" 
                 :class="quickFilter === cat.id ? 'bg-primary dark:bg-accent text-white' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
                 class="px-6 py-1.5 rounded text-sm font-medium transition whitespace-nowrap">
                 {{ cat.name }}
@@ -71,6 +71,7 @@
     <div v-else class="space-y-8">
         <div v-for="category in filteredGroups" :key="category.id" :id="'cat-' + category.id" class="space-y-4">
             <h3 v-if="category.items.length > 0" class="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
+                <span class="material-symbols-outlined text-2xl mr-2 text-primary dark:text-accent">{{ category.icon || 'folder' }}</span>
                 {{ category.name }}
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -177,6 +178,14 @@ onMounted(() => {
     dataStore.fetchSettings();
 });
 
+// 获取权重最高（sort_order 最小）的3个分类
+const topCategories = computed(() => {
+    return categories.value
+        .filter(c => c.name !== '全部项目')
+        .sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0))
+        .slice(0, 3);
+});
+
 const handleSubmit = async () => {
     try {
         await dataStore.submitItem(submitForm.value);
@@ -198,8 +207,13 @@ const getIconType = (item) => {
 
 const getIconSrc = (item) => {
     if (!item.icon) {
-        // Use Google Favicon Service or unavatar
-        return `https://www.google.com/s2/favicons?domain=${item.url}&sz=64`;
+        // 从 URL 提取域名，使用 Unavatar 获取高清图标
+        try {
+            const domain = new URL(item.url).hostname;
+            return `https://unavatar.io/${domain}?fallback=https://icon.horse/icon/${domain}`;
+        } catch {
+            return `https://unavatar.io/${item.url}`;
+        }
     }
     if (item.icon.startsWith('http') || item.icon.startsWith('/')) {
         return item.icon;

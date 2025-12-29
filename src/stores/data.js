@@ -5,13 +5,14 @@ export const useDataStore = defineStore('data', () => {
     const items = ref([])
     const categories = ref([])
     const friendLinks = ref([])
+    const tags = ref([])  // 标签列表
     const settings = ref({})
     const loading = ref(false)
     const error = ref(null)
 
     const filters = ref({
         status: [],
-        deploy: null // 'cloudflare', 'vercel', 'other' or null
+        tags: []  // 选中的标签ID数组
     })
 
     const groupedItems = computed(() => {
@@ -23,14 +24,11 @@ export const useDataStore = defineStore('data', () => {
             if (filters.value.status.length > 0) {
                 if (!filters.value.status.includes(item.status)) return false;
             }
-            // Deploy Filter (assuming description or tags contains deploy info for now, 
-            // ideally we add a deploy_type column, but for gap filling we can infer or added later.
-            // For now, let's assume 'deploy' is not strictly in schema yet, so we'll skip strict filtering 
-            // or simple match if we add it to schema. 
-            // Let's defer strict deploy filtering until schema update or just match description.)
-            if (filters.value.deploy) {
-                const desc = (item.description || '').toLowerCase();
-                if (!desc.includes(filters.value.deploy)) return false;
+            // Tags Filter - 只要命中任意一个选中的标签就显示
+            if (filters.value.tags.length > 0) {
+                const itemTagIds = (item.tags || []).map(t => t.id);
+                const hasMatchingTag = filters.value.tags.some(tagId => itemTagIds.includes(tagId));
+                if (!hasMatchingTag) return false;
             }
             return true;
         });
@@ -69,6 +67,11 @@ export const useDataStore = defineStore('data', () => {
             const flRes = await fetch('/api/public/friend_links')
             if (flRes.ok) {
                 friendLinks.value = await flRes.json()
+            }
+            // Tags for filtering
+            const tagsRes = await fetch('/api/public/tags')
+            if (tagsRes.ok) {
+                tags.value = await tagsRes.json()
             }
         } catch (e) {
             error.value = e.message
@@ -270,5 +273,5 @@ export const useDataStore = defineStore('data', () => {
         return await res.json()
     }
 
-    return { items, categories, groupedItems, categoryCounts, filters, loading, error, settings, friendLinks, fetchPublicData, fetchAdminItems, createItem, updateItem, deleteItem, fetchAdminCategories, createCategory, updateCategory, deleteCategory, submitItem, fetchSettings, updateSettings, fetchAdminFriendLinks, createFriendLink, updateFriendLink, deleteFriendLink, fetchAdminTags, createTag, updateTag, deleteTag }
+    return { items, categories, tags, groupedItems, categoryCounts, filters, loading, error, settings, friendLinks, fetchPublicData, fetchAdminItems, createItem, updateItem, deleteItem, fetchAdminCategories, createCategory, updateCategory, deleteCategory, submitItem, fetchSettings, updateSettings, fetchAdminFriendLinks, createFriendLink, updateFriendLink, deleteFriendLink, fetchAdminTags, createTag, updateTag, deleteTag }
 })
