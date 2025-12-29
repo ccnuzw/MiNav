@@ -109,7 +109,7 @@
     <div v-else-if="error" class="text-center text-red-500">{{ error }}</div>
 
     <div v-else class="space-y-8">
-        <div v-for="category in filteredGroups" :key="category.id" :id="'cat-' + category.id" class="space-y-4">
+        <div v-for="category in filteredGroups" :key="category.id" :id="'cat-' + category.id" class="space-y-4 scroll-mt-[100px]">
             <h3 v-if="category.items.length > 0" class="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
                 <span class="material-symbols-outlined text-2xl mr-2 text-primary dark:text-accent">{{ category.icon || 'folder' }}</span>
                 {{ category.name }}
