@@ -7,7 +7,7 @@
         </button>
     </div>
 
-    <div class="overflow-x-auto">
+    <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
             <thead class="bg-gray-50 dark:bg-gray-700 text-xs uppercase text-gray-700 dark:text-gray-300">
                 <tr>
@@ -40,6 +40,32 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="grid grid-cols-1 gap-4 md:hidden">
+        <div v-for="link in links" :key="link.id" class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
+             <div class="flex items-start space-x-3 mb-3">
+                 <div class="w-10 h-10 rounded flex-shrink-0 flex items-center justify-center overflow-hidden bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
+                    <img v-if="getLinkIconType(link) === 'image'" :src="getLinkIconSrc(link)" alt="" class="w-full h-full object-cover" />
+                    <i v-else :class="getLinkIconSrc(link)" class="text-xl text-gray-600 dark:text-gray-300"></i>
+                 </div>
+                 <div class="flex-1 min-w-0">
+                     <h4 class="font-bold text-gray-900 dark:text-white truncate">{{ link.name }}</h4>
+                     <div class="text-xs text-gray-500 truncate">{{ link.url }}</div>
+                 </div>
+                 <span class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-gray-600 dark:text-gray-300 flex-shrink-0">排序: {{ link.sort_order }}</span>
+             </div>
+             
+             <div class="flex justify-end space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                 <button @click="editLink(link)" class="px-3 py-1 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition">
+                     编辑
+                 </button>
+                 <button @click="deleteLink(link.id)" class="px-3 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition">
+                     删除
+                 </button>
+             </div>
+        </div>
     </div>
 
     <!-- Modal -->

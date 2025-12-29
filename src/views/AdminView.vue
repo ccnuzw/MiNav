@@ -1,51 +1,66 @@
 <template>
   <div class="min-h-screen bg-secondary-bg dark:bg-dark-bg p-8 text-gray-900 dark:text-white">
     <div class="max-w-6xl mx-auto">
-        <div class="flex justify-between items-center mb-8">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <h1 class="text-3xl font-bold">后台管理</h1>
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-4 w-full md:w-auto justify-between md:justify-end">
                  <span class="text-sm text-gray-500">欢迎, 管理员</span>
-                 <button @click="logout" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition">退出登录</button>
+                 <button @click="logout" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition text-sm">退出登录</button>
             </div>
         </div>
         
         <!-- Tabs -->
-        <div class="flex space-x-1 bg-gray-200 dark:bg-gray-700 p-1 rounded-lg mb-6 w-fit">
+        <!-- Tabs -->
+        <!-- Tabs (Desktop) -->
+        <div class="hidden md:flex space-x-1 bg-gray-200 dark:bg-gray-700 p-1 rounded-lg mb-6 w-full overflow-x-auto">
             <button 
                 @click="activeTab = 'items'"
                 :class="activeTab === 'items' ? 'bg-white dark:bg-dark-card shadow' : ''"
-                class="px-4 py-2 rounded-md text-sm font-medium transition"
+                class="px-4 py-2 rounded-md text-sm font-medium transition whitespace-nowrap flex-shrink-0"
             >项目管理</button>
             <button 
                 @click="activeTab = 'categories'"
                 :class="activeTab === 'categories' ? 'bg-white dark:bg-dark-card shadow' : ''"
-                class="px-4 py-2 rounded-md text-sm font-medium transition"
+                class="px-4 py-2 rounded-md text-sm font-medium transition whitespace-nowrap flex-shrink-0"
             >分类管理</button>
             <button 
                 @click="activeTab = 'tags'"
                 :class="activeTab === 'tags' ? 'bg-white dark:bg-dark-card shadow' : ''"
-                class="px-4 py-2 rounded-md text-sm font-medium transition"
+                class="px-4 py-2 rounded-md text-sm font-medium transition whitespace-nowrap flex-shrink-0"
             >标签管理</button>
             <button 
                 @click="activeTab = 'settings'"
                 :class="activeTab === 'settings' ? 'bg-white dark:bg-dark-card shadow' : ''"
-                class="px-4 py-2 rounded-md text-sm font-medium transition"
+                class="px-4 py-2 rounded-md text-sm font-medium transition whitespace-nowrap flex-shrink-0"
             >网站设置</button>
             <button 
                 @click="activeTab = 'friendlinks'"
                 :class="activeTab === 'friendlinks' ? 'bg-white dark:bg-dark-card shadow' : ''"
-                class="px-4 py-2 rounded-md text-sm font-medium transition"
+                class="px-4 py-2 rounded-md text-sm font-medium transition whitespace-nowrap flex-shrink-0"
             >友情链接</button>
             <button 
                 @click="activeTab = 'account'"
                 :class="activeTab === 'account' ? 'bg-white dark:bg-dark-card shadow' : ''"
-                class="px-4 py-2 rounded-md text-sm font-medium transition"
+                class="px-4 py-2 rounded-md text-sm font-medium transition whitespace-nowrap flex-shrink-0"
             >账户安全</button>
             <button 
                 @click="activeTab = 'feedbacks'"
                 :class="activeTab === 'feedbacks' ? 'bg-white dark:bg-dark-card shadow' : ''"
-                class="px-4 py-2 rounded-md text-sm font-medium transition"
+                class="px-4 py-2 rounded-md text-sm font-medium transition whitespace-nowrap flex-shrink-0"
             >反馈管理</button>
+        </div>
+
+        <!-- Mobile Navigation (Dropdown) -->
+        <div class="md:hidden mb-6">
+            <select v-model="activeTab" class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card text-gray-700 dark:text-gray-200 focus:ring-primary focus:border-primary outline-none">
+                <option value="items">项目管理</option>
+                <option value="categories">分类管理</option>
+                <option value="tags">标签管理</option>
+                <option value="settings">网站设置</option>
+                <option value="friendlinks">友情链接</option>
+                <option value="account">账户安全</option>
+                <option value="feedbacks">反馈管理</option>
+            </select>
         </div>
 
         <div v-if="activeTab === 'items'">

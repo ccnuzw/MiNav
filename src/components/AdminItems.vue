@@ -1,19 +1,20 @@
 <template>
   <div class="bg-white dark:bg-dark-card p-6 rounded-lg shadow">
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
         <h2 class="text-xl font-bold dark:text-white">项目管理</h2>
-        <div class="flex items-center space-x-2">
-            <select v-model="filterCategoryId" @change="resetAndLoad" class="border rounded px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+        <div class="flex items-center space-x-2 w-full md:w-auto">
+            <select v-model="filterCategoryId" @change="resetAndLoad" class="flex-1 md:flex-none border rounded px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white">
                 <option value="all">所有分类</option>
                 <option v-for="cat in categories.filter(c => c.name !== '全部项目')" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
             </select>
-            <button @click="showAddModal = true" class="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover transition">
+            <button @click="showAddModal = true" class="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover transition whitespace-nowrap">
                 添加项目
             </button>
         </div>
     </div>
 
-    <div class="overflow-x-auto">
+    <!-- Desktop Table View -->
+    <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
             <thead class="bg-gray-50 dark:bg-gray-700 text-xs uppercase text-gray-700 dark:text-gray-300">
                 <tr>
@@ -61,12 +62,54 @@
         </table>
     </div>
 
+    <!-- Mobile Card View -->
+    <div class="grid grid-cols-1 gap-4 md:hidden">
+        <div v-for="item in items" :key="item.id" class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
+            <div class="flex items-start space-x-3 mb-3">
+                 <!-- Icon -->
+                 <div class="w-10 h-10 rounded flex-shrink-0 flex items-center justify-center overflow-hidden bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
+                    <img v-if="getItemIconType(item) === 'image'" :src="getItemIconSrc(item)" class="w-full h-full object-cover" />
+                    <i v-else :class="getItemIconSrc(item)" class="text-xl text-gray-600 dark:text-gray-300"></i>
+                 </div>
+                 <!-- Name & Link -->
+                 <div class="flex-1 min-w-0">
+                     <h4 class="font-bold text-gray-900 dark:text-white truncate">{{ item.name }}</h4>
+                     <div class="text-xs text-gray-500 truncate">{{ item.url }}</div>
+                 </div>
+                 <!-- Status -->
+                <span :class="item.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 py-0.5 rounded text-xs flex-shrink-0">{{ item.status }}</span>
+            </div>
+            
+            <div class="space-y-2 mb-4">
+                 <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                    <span class="material-symbols-outlined text-base mr-1">folder</span>
+                    {{ getCategoryName(item.category_id) }}
+                 </div>
+                 <div class="flex flex-wrap gap-1">
+                     <span v-for="tag in (item.tags || [])" :key="tag.id" class="px-2 py-0.5 text-xs font-medium rounded-full text-white" :style="{ backgroundColor: tag.color }">{{ tag.name }}</span>
+                 </div>
+            </div>
+            
+            <div class="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-gray-700">
+                 <div class="text-xs text-gray-400">排序: {{ item.sort_order }}</div>
+                 <div class="space-x-2">
+                    <button @click="editItem(item)" class="px-3 py-1 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition">
+                        编辑
+                    </button>
+                    <button @click="deleteItem(item.id)" class="px-3 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition">
+                        删除
+                    </button>
+                 </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Pagination Controls -->
-    <div class="flex justify-between items-center mt-4 px-2">
-        <span class="text-sm text-gray-700 dark:text-gray-400">
+    <div class="flex flex-col md:flex-row justify-between items-center mt-4 px-2 gap-4">
+        <span class="text-sm text-gray-700 dark:text-gray-400 order-2 md:order-1">
             显示 {{ (page - 1) * limit + 1 }} 到 {{ Math.min(page * limit, total) }} 条，共 {{ total }} 条
         </span>
-        <div class="flex space-x-2">
+        <div class="flex space-x-2 order-1 md:order-2 w-full md:w-auto justify-end">
             <button 
                 @click="changePage(page - 1)" 
                 :disabled="page === 1"

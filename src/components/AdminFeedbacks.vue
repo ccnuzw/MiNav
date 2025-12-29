@@ -1,15 +1,15 @@
 <template>
   <div class="bg-white dark:bg-dark-card p-6 rounded-lg shadow">
-    <div class="flex justify-between items-center mb-6">
-      <div class="flex items-center gap-4">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+      <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-start">
         <h2 class="text-xl font-bold dark:text-white">反馈管理</h2>
         <span v-if="unreadCount > 0" class="px-2 py-1 text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded-full">
           {{ unreadCount }} 条未读
         </span>
       </div>
-      <div class="flex items-center gap-4">
+      <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 w-full md:w-auto">
         <!-- 批量操作区 -->
-        <div class="flex items-center gap-4 border-r pr-4 mr-2 border-gray-200 dark:border-gray-700">
+        <div class="flex items-center gap-4 border-r-0 sm:border-r pr-0 sm:pr-4 mr-0 sm:mr-2 border-gray-200 dark:border-gray-700 w-full sm:w-auto justify-between sm:justify-start">
             <label v-if="feedbacks.length > 0" class="flex items-center gap-2 cursor-pointer select-none text-sm text-gray-600 dark:text-gray-300 hover:text-primary transition">
                 <input type="checkbox" :checked="isAllSelected" @change="toggleSelectAll" class="rounded border-gray-300 text-primary focus:ring-primary h-4 w-4" />
                 全选
@@ -22,23 +22,23 @@
             </button>
         </div>
         <!-- 状态筛选 -->
-        <div class="flex gap-2">
+        <div class="flex gap-2 w-full sm:w-auto overflow-x-auto pb-1 sm:pb-0">
             <button 
             @click="statusFilter = 'all'" 
             :class="statusFilter === 'all' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
-            class="px-3 py-1.5 rounded text-sm font-medium transition">
+            class="px-3 py-1.5 rounded text-sm font-medium transition whitespace-nowrap">
             全部
             </button>
             <button 
             @click="statusFilter = 'pending'" 
             :class="statusFilter === 'pending' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
-            class="px-3 py-1.5 rounded text-sm font-medium transition">
+            class="px-3 py-1.5 rounded text-sm font-medium transition whitespace-nowrap">
             未读
             </button>
             <button 
             @click="statusFilter = 'read'" 
             :class="statusFilter === 'read' ? 'bg-primary text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'"
-            class="px-3 py-1.5 rounded text-sm font-medium transition">
+            class="px-3 py-1.5 rounded text-sm font-medium transition whitespace-nowrap">
             已读
             </button>
         </div>

@@ -7,7 +7,8 @@
         </button>
     </div>
 
-    <div class="overflow-x-auto">
+    <!-- Desktop Table -->
+    <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
             <thead class="bg-gray-50 dark:bg-gray-700 text-xs uppercase text-gray-700 dark:text-gray-300">
                 <tr>
@@ -20,7 +21,7 @@
             <tbody>
                 <tr v-for="cat in categories" :key="cat.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ cat.name }}</td>
-                    <td class="px-6 py-4"><span class="material-symbols-outlined">{{ cat.icon }}</span> ({{ cat.icon }})</td>
+                    <td class="px-6 py-4"><span class="material-symbols-outlined align-middle mr-1">{{ cat.icon }}</span> <span class="text-xs text-gray-500">({{ cat.icon }})</span></td>
                     <td class="px-6 py-4">{{ cat.sort_order }}</td>
                     <td class="px-6 py-4 space-x-2">
                         <button @click="openEditModal(cat)" class="px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 transition">
@@ -33,6 +34,29 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="grid grid-cols-1 gap-4 md:hidden">
+        <div v-for="cat in categories" :key="cat.id" class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
+             <div class="flex items-start justify-between mb-2">
+                <h4 class="font-bold text-gray-900 dark:text-white">{{ cat.name }}</h4>
+                <span class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-gray-600 dark:text-gray-300">排序: {{ cat.sort_order }}</span>
+             </div>
+             <div class="flex items-center text-gray-600 dark:text-gray-400 mb-3">
+                 <span class="material-symbols-outlined text-xl mr-2">{{ cat.icon }}</span>
+                 <span class="text-sm font-mono">{{ cat.icon }}</span>
+             </div>
+             <div class="text-xs text-gray-500 mb-3" v-if="cat.description">{{ cat.description }}</div>
+             <div class="flex justify-end space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                <button @click="openEditModal(cat)" class="px-3 py-1 text-xs bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded hover:bg-blue-200 dark:hover:bg-blue-900/50 transition">
+                    编辑
+                </button>
+                <button @click="deleteCategory(cat.id)" class="px-3 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition">
+                    删除
+                </button>
+             </div>
+        </div>
     </div>
 
     <!-- Modal -->

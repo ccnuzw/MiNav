@@ -3,6 +3,10 @@
     <!-- Header -->
     <header class="w-full px-6 py-4 flex justify-between items-center max-w-full mx-auto border-b border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card sticky top-0 z-40">
         <div class="flex items-center space-x-2">
+            <!-- Mobile Menu Button -->
+            <button @click="isMobileMenuOpen = true" class="lg:hidden p-2 rounded-md text-gray-600 hover:text-primary hover:bg-gray-100 dark:text-gray-400 dark:hover:text-accent dark:hover:bg-gray-800 transition">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
             <div class="text-2xl font-bold flex flex-col leading-tight">
                 <span class="text-gray-800 dark:text-white">{{ settings.site_name || 'MiNav' }}</span>
                 <span class="flex items-center text-primary dark:text-accent text-sm">
@@ -22,103 +26,41 @@
 
     <div class="flex flex-1">
         <!-- Sidebar -->
+        <!-- Sidebar (Desktop) -->
         <aside class="hidden lg:block w-72 bg-white dark:bg-dark-card border-r border-gray-200 dark:border-dark-border p-6 pt-8 sticky top-[65px] h-[calc(100vh-65px)] overflow-y-auto scrollbar-hide transition-all duration-300 z-30">
-            <!-- Sidebar Content -->
-            <h3 class="font-bold text-gray-900 dark:text-white text-lg mb-6">高级筛选</h3>
-            <!-- Search -->
-            <div class="mb-6">
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2" for="sidebar-search">快速搜索</label>
-                <input class="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-card text-gray-700 dark:text-gray-200 focus:ring-primary focus:border-primary dark:focus:ring-accent dark:focus:border-accent outline-none text-sm transition shadow-sm" id="sidebar-search" placeholder="搜索项目..." type="text" />
-            </div>
-            <!-- Categories (Example) -->
-            <!-- Categories -->
-            <nav class="space-y-2 mb-8">
-                <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">分类</h4>
-                <a href="#" @click.prevent="scrollToTop" 
-                   class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition"
-                   :class="activeCategoryId === null 
-                       ? 'text-primary bg-primary/10 dark:text-accent dark:bg-accent/10' 
-                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'">
-                    <span class="material-symbols-outlined text-lg mr-2">apps</span>
-                    全部项目
-                    <span class="ml-auto text-xs font-semibold px-2 py-0.5 rounded-full"
-                          :class="activeCategoryId === null 
-                              ? 'bg-primary/20 dark:bg-accent/20 text-primary dark:text-accent' 
-                              : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">{{ totalItemsCount }}</span>
-                </a>
-                <a v-for="cat in categories.filter(c => c.name !== '全部项目')" :key="cat.id" :href="'#cat-' + cat.id" @click.prevent="scrollToCategory(cat.id)" 
-                   class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition"
-                   :class="activeCategoryId === cat.id 
-                       ? 'text-primary bg-primary/10 dark:text-accent dark:bg-accent/10' 
-                       : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'">
-                    <span class="material-symbols-outlined text-lg mr-2" 
-                          :class="activeCategoryId === cat.id ? 'text-primary dark:text-accent' : 'text-gray-500 dark:text-gray-400'">{{ cat.icon || 'folder' }}</span>
-                    {{ cat.name }}
-                    <span class="ml-auto text-xs font-semibold px-2 py-0.5 rounded-full"
-                          :class="activeCategoryId === cat.id 
-                              ? 'bg-primary/20 dark:bg-accent/20 text-primary dark:text-accent' 
-                              : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300'">{{ categoryCounts[cat.id] || 0 }}</span>
-                </a>
-            </nav>
-            
-            <!-- Filters -->
-             <div class="space-y-4 mb-8">
-                <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">状态筛选</h4>
-                <div class="flex flex-wrap gap-2">
-                    <button 
-                        @click="toggleStatusFilter('active')"
-                        class="px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 transform hover:scale-105"
-                        :class="filters.status.includes('active') 
-                            ? 'text-white shadow-md bg-green-500 ring-2 ring-offset-2 ring-green-500 ring-offset-white dark:ring-offset-dark-card' 
-                            : 'text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'">
-                        <i v-if="filters.status.includes('active')" class="fas fa-check mr-1 text-xs"></i>
-                        正常
-                    </button>
-                    <button 
-                        @click="toggleStatusFilter('inactive')"
-                        class="px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 transform hover:scale-105"
-                        :class="filters.status.includes('inactive') 
-                            ? 'text-white shadow-md bg-gray-500 ring-2 ring-offset-2 ring-gray-500 ring-offset-white dark:ring-offset-dark-card' 
-                            : 'text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'">
-                        <i v-if="filters.status.includes('inactive')" class="fas fa-check mr-1 text-xs"></i>
-                        停用
-                    </button>
-                </div>
-                <button 
-                    v-if="filters.status.length > 0" 
-                    @click="filters.status = []" 
-                    class="text-xs text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-accent flex items-center gap-1 mt-2">
-                    <i class="fas fa-times"></i> 清除状态筛选
-                </button>
-            </div>
-
-            <div class="space-y-4">
-                <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-3">标签筛选</h4>
-                <div class="flex flex-wrap gap-2">
-                    <button 
-                        v-for="tag in tags" 
-                        :key="tag.id"
-                        @click="toggleTagFilter(tag.id)"
-                        class="px-3 py-1.5 text-sm font-medium rounded-full transition-all duration-200 transform hover:scale-105"
-                        :class="filters.tags.includes(tag.id) 
-                            ? 'text-white shadow-md ring-2 ring-offset-2 ring-offset-white dark:ring-offset-dark-card' 
-                            : 'text-gray-600 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'"
-                        :style="filters.tags.includes(tag.id) ? { backgroundColor: tag.color, ringColor: tag.color } : {}"
-                    >
-                        <i v-if="filters.tags.includes(tag.id)" class="fas fa-check mr-1 text-xs"></i>
-                        {{ tag.name }}
-                    </button>
-                </div>
-                <p v-if="tags.length === 0" class="text-gray-400 text-sm">暂无标签</p>
-                <button 
-                    v-if="filters.tags.length > 0" 
-                    @click="filters.tags = []" 
-                    class="text-xs text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-accent flex items-center gap-1 mt-2"
-                >
-                    <i class="fas fa-times"></i> 清除全部
-                </button>
-            </div>
+            <SidebarContent 
+                :activeCategoryId="activeCategoryId"
+                @scrollToTop="scrollToTop"
+                @scrollToCategory="scrollToCategory"
+            />
         </aside>
+
+        <!-- Mobile Drawer -->
+        <div v-if="isMobileMenuOpen" class="fixed inset-0 z-50 lg:hidden" role="dialog" aria-modal="true">
+            <!-- Backdrop -->
+            <div class="fixed inset-0 bg-black/50 backdrop-blur-sm transition-opacity" @click="isMobileMenuOpen = false"></div>
+            
+            <!-- Drawer Panel -->
+            <div class="fixed inset-y-0 left-0 z-50 w-full max-w-xs bg-white dark:bg-dark-card shadow-xl transform transition-transform duration-300 flex flex-col pl-6 pr-6 py-6">
+                <div class="flex items-center justify-between mb-8">
+                     <div class="text-xl font-bold text-gray-900 dark:text-white">
+                        导航菜单
+                    </div>
+                    <button @click="isMobileMenuOpen = false" class="p-2 -mr-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto scrollbar-hide">
+                    <SidebarContent 
+                        :activeCategoryId="activeCategoryId"
+                        @close="isMobileMenuOpen = false"
+                        @scrollToTop="scrollToTop"
+                        @scrollToCategory="scrollToCategory"
+                    />
+                </div>
+            </div>
+        </div>
 
         <!-- Main Content -->
         <main class="flex-1 min-h-screen max-w-full lg:max-w-[calc(100%-18rem)] mx-auto px-4 sm:px-6 lg:px-8 py-12 relative overflow-hidden">
@@ -156,9 +98,12 @@
 import { onMounted, onUnmounted, computed, ref } from 'vue';
 import { useDataStore } from '../stores/data';
 import { storeToRefs } from 'pinia';
+import SidebarContent from '../components/SidebarContent.vue';
 
 const dataStore = useDataStore();
 const { categories, categoryCounts, items, tags, filters, settings, friendLinks } = storeToRefs(dataStore);
+
+const isMobileMenuOpen = ref(false);
 
 const totalItemsCount = computed(() => items.value.length);
 
@@ -243,24 +188,8 @@ const scrollToCategory = (id) => {
     }
 }
 
-const toggleTagFilter = (tagId) => {
-    const index = filters.value.tags.indexOf(tagId);
-    if (index > -1) {
-        filters.value.tags.splice(index, 1);
-    } else {
-        filters.value.tags.push(tagId);
-    }
-}
 
-// 切换状态筛选
-const toggleStatusFilter = (status) => {
-    const index = filters.value.status.indexOf(status);
-    if (index > -1) {
-        filters.value.status.splice(index, 1);
-    } else {
-        filters.value.status.push(status);
-    }
-}
+
 
 // 获取友链图标类型
 const getLinkIconType = (link) => {

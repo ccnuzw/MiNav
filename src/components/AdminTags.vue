@@ -7,7 +7,7 @@
         </button>
     </div>
 
-    <div class="overflow-x-auto">
+    <div class="hidden md:block overflow-x-auto">
         <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
             <thead class="bg-gray-50 dark:bg-gray-700 text-xs uppercase text-gray-700 dark:text-gray-300">
                 <tr>
@@ -44,6 +44,33 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+
+    <!-- Mobile Card View -->
+    <div class="grid grid-cols-1 gap-4 md:hidden">
+        <div v-for="tag in tags" :key="tag.id" class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
+             <div class="flex items-center justify-between mb-3">
+                 <div class="flex items-center">
+                     <div class="w-6 h-6 rounded-full mr-2 shadow-sm border border-black/10 dark:border-white/10" :style="{ backgroundColor: tag.color }"></div>
+                     <h4 class="font-bold text-gray-900 dark:text-white">{{ tag.name }}</h4>
+                 </div>
+                 <span class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded text-gray-600 dark:text-gray-300">排序: {{ tag.sort_order }}</span>
+             </div>
+             <div class="mb-3 text-sm text-gray-500">
+                 Color: <code class="bg-gray-100 dark:bg-gray-900 px-1 rounded">{{ tag.color }}</code>
+             </div>
+             <div class="flex justify-end space-x-2 pt-2 border-t border-gray-200 dark:border-gray-700">
+                 <button @click="editTag(tag)" class="px-3 py-1 text-xs bg-primary/10 dark:bg-accent/20 text-primary dark:text-accent rounded hover:bg-primary/20 dark:hover:bg-accent/30 transition">
+                     编辑
+                 </button>
+                 <button @click="deleteTag(tag.id)" class="px-3 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition">
+                     删除
+                 </button>
+             </div>
+        </div>
+        <div v-if="tags.length === 0" class="text-center text-gray-400 py-8 border-2 border-dashed border-gray-200 dark:border-gray-700 rounded-lg">
+            暂无标签
+        </div>
     </div>
 
     <!-- Modal -->
