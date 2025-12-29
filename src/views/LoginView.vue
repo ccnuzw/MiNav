@@ -55,6 +55,40 @@
             required 
           />
         </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+            <span class="flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+              </svg>
+              验证码
+            </span>
+          </label>
+          <div class="flex gap-2">
+            <div class="flex-1 flex items-center gap-2">
+              <div class="flex-shrink-0 px-4 py-3 bg-gray-100 dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-xl text-gray-700 dark:text-gray-200 font-mono text-center min-w-[120px]">
+                {{ captchaQuestion }}
+              </div>
+              <input 
+                v-model="captcha.userAnswer.value" 
+                type="number" 
+                class="flex-1 px-4 py-3 rounded-xl border border-gray-300 dark:border-dark-border bg-white/50 dark:bg-dark-bg/50 text-gray-700 dark:text-gray-200 focus:ring-2 focus:ring-primary/50 focus:border-primary outline-none transition-all duration-200 placeholder:text-gray-400 dark:placeholder:text-gray-500" 
+                placeholder="答案"
+                required 
+              />
+            </div>
+            <button 
+              type="button"
+              @click="captcha.generateCaptcha()"
+              class="px-3 py-3 bg-gray-100 dark:bg-dark-bg border border-gray-300 dark:border-dark-border rounded-xl hover:bg-gray-200 dark:hover:bg-gray-700 transition"
+              title="刷新验证码"
+            >
+              <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
+        </div>
         <button 
           type="submit" 
           :disabled="loading"
@@ -105,10 +139,11 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useAuthStore } from '../stores/auth';
 import { useNotificationStore } from '../stores/notification';
 import { useRouter } from 'vue-router';
+import { useMathCaptcha } from '../composables/useMathCaptcha';
 
 const username = ref('');
 const password = ref('');
@@ -118,8 +153,20 @@ const authStore = useAuthStore();
 const notification = useNotificationStore();
 const router = useRouter();
 
+// 验证码
+const captcha = useMathCaptcha();
+const captchaQuestion = computed(() => captcha.captchaQuestion.value);
+
 const handleLogin = async () => {
     if (loading.value) return;
+    
+    // 验证验证码
+    if (!captcha.validateAnswer()) {
+        notification.error('验证码错误，请重新计算');
+        captcha.generateCaptcha();
+        return;
+    }
+    
     loading.value = true;
     try {
         await authStore.login(username.value, password.value);
@@ -127,6 +174,8 @@ const handleLogin = async () => {
         router.push('/admin');
     } catch (e) {
         notification.error(e.message || '登录失败，请检查用户名和密码');
+        // 登录失败后刷新验证码
+        captcha.generateCaptcha();
     } finally {
         loading.value = false;
     }

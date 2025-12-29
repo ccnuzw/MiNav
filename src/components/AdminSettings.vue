@@ -107,9 +107,11 @@
 import { ref, computed, onMounted } from 'vue';
 import { useDataStore } from '../stores/data';
 import { useAuthStore } from '../stores/auth';
+import { useNotificationStore } from '../stores/notification';
 
 const dataStore = useDataStore();
 const authStore = useAuthStore();
+const notification = useNotificationStore();
 const form = ref({ hero_title: '', hero_subtitle: '', hero_description: '', site_name: '', site_tagline: '', default_icon: '', feedback_enabled: 'true' });
 const loading = ref(false);
 
@@ -135,9 +137,9 @@ const handleSubmit = async () => {
     loading.value = true;
     try {
         await dataStore.updateSettings(authStore.token, form.value);
-        alert('设置已保存');
+        notification.success('设置已保存');
     } catch (e) {
-        alert('保存失败: ' + e.message);
+        notification.error('保存失败: ' + e.message);
     } finally {
         loading.value = false;
     }

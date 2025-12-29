@@ -213,6 +213,33 @@
                     <label class="block text-sm font-medium dark:text-gray-300">建议内容 <span class="text-red-500">*</span></label>
                     <textarea v-model="feedbackForm.content" rows="4" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" required placeholder="请输入您的建议或反馈..."></textarea>
                 </div>
+                <div>
+                    <label class="block text-sm font-medium dark:text-gray-300 mb-1.5">验证码 <span class="text-red-500">*</span></label>
+                    <div class="flex gap-2">
+                        <div class="flex-1 flex items-center gap-2">
+                            <div class="flex-shrink-0 px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded text-gray-700 dark:text-gray-200 font-mono text-center min-w-[100px]">
+                                {{ feedbackCaptchaQuestion }}
+                            </div>
+                            <input 
+                                v-model="feedbackCaptcha.userAnswer.value" 
+                                type="number" 
+                                class="flex-1 border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" 
+                                placeholder="答案"
+                                required 
+                            />
+                        </div>
+                        <button 
+                            type="button"
+                            @click="feedbackCaptcha.generateCaptcha()"
+                            class="px-3 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition"
+                            title="刷新验证码"
+                        >
+                            <svg class="w-5 h-5 text-gray-600 dark:text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
                 <div class="flex justify-end space-x-2 mt-6">
                     <button type="button" @click="showFeedbackModal = false" class="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400">取消</button>
                     <button type="submit" :disabled="feedbackSubmitting" class="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover disabled:opacity-50">
@@ -230,6 +257,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue';
 import MainLayout from '../layouts/MainLayout.vue';
 import { useDataStore } from '../stores/data';
 import { useNotificationStore } from '../stores/notification';
+import { useMathCaptcha } from '../composables/useMathCaptcha';
 import { storeToRefs } from 'pinia';
 
 const dataStore = useDataStore();
@@ -252,20 +280,34 @@ const showFeedbackModal = ref(false);
 const feedbackForm = ref({ email: '', content: '' });
 const feedbackSubmitting = ref(false);
 
+// 反馈验证码
+const feedbackCaptcha = useMathCaptcha();
+const feedbackCaptchaQuestion = computed(() => feedbackCaptcha.captchaQuestion.value);
+
 // 提交反馈
 const handleFeedbackSubmit = async () => {
     if (!feedbackForm.value.content.trim()) {
         notification.warning('请输入反馈内容');
         return;
     }
+    
+    // 验证验证码
+    if (!feedbackCaptcha.validateAnswer()) {
+        notification.error('验证码错误，请重新计算');
+        feedbackCaptcha.generateCaptcha();
+        return;
+    }
+    
     feedbackSubmitting.value = true;
     try {
         await dataStore.submitFeedback(feedbackForm.value);
         notification.success('反馈提交成功，感谢您的建议！');
         showFeedbackModal.value = false;
         feedbackForm.value = { email: '', content: '' };
+        feedbackCaptcha.generateCaptcha();
     } catch (e) {
         notification.error('提交失败: ' + e.message);
+        feedbackCaptcha.generateCaptcha();
     } finally {
         feedbackSubmitting.value = false;
     }
