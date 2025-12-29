@@ -24,6 +24,9 @@
             </div>
         </div>
         <div class="flex items-center space-x-6 text-xl">
+            <router-link to="/articles" class="text-base font-medium text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-accent transition">
+                <i class="fas fa-newspaper mr-1"></i> 文章
+            </router-link>
             <a class="text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-accent transition" href="https://github.com/ccnuzw/MiNav" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
             <button class="text-gray-600 hover:text-primary dark:text-gray-400 dark:hover:text-accent transition" @click="toggleDarkMode">
                 <i class="fas fa-moon dark:hidden"></i>
