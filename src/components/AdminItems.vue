@@ -90,23 +90,24 @@
         <div v-for="item in items" :key="item.id" class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative">
             <div class="flex items-start space-x-3 mb-3">
                  <!-- Icon -->
-                 <div class="w-10 h-10 rounded flex-shrink-0 flex items-center justify-center overflow-hidden bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800">
+                 <div class="w-10 h-10 rounded flex-shrink-0 flex items-center justify-center overflow-hidden bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 mt-1">
                     <img v-if="getItemIconType(item) === 'image'" :src="getItemIconSrc(item)" class="w-full h-full object-cover" />
                     <i v-else :class="getItemIconSrc(item)" class="text-xl text-gray-600 dark:text-gray-300"></i>
                  </div>
                  <!-- Name & Link -->
                  <div class="flex-1 min-w-0">
-                     <h4 class="font-bold text-gray-900 dark:text-white truncate">{{ item.name }}</h4>
-                     <div class="text-xs text-gray-500 truncate">{{ item.url }}</div>
+                     <h4 class="font-bold text-gray-900 dark:text-white break-all leading-tight mb-1">{{ item.name }}</h4>
+                     <div class="text-xs text-gray-500 break-all leading-normal">{{ item.url }}</div>
                  </div>
-                 <!-- Status -->
-                <span :class="item.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 py-0.5 rounded text-xs flex-shrink-0">{{ item.status }}</span>
             </div>
             
             <div class="space-y-2 mb-4">
-                 <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
-                    <span class="material-symbols-outlined text-base mr-1">folder</span>
-                    {{ getCategoryName(item.category_id) }}
+                 <div class="flex items-center justify-between">
+                     <div class="flex items-center text-sm text-gray-600 dark:text-gray-400">
+                        <span class="material-symbols-outlined text-base mr-1">folder</span>
+                        {{ getCategoryName(item.category_id) }}
+                     </div>
+                     <span :class="item.status === 'active' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'" class="px-2 py-0.5 rounded text-xs flex-shrink-0 whitespace-nowrap">{{ item.status }}</span>
                  </div>
                  <div class="flex flex-wrap gap-1">
                      <span v-for="tag in (item.tags || [])" :key="tag.id" class="px-2 py-0.5 text-xs font-medium rounded-full text-white" :style="{ backgroundColor: tag.color }">{{ tag.name }}</span>
