@@ -6,7 +6,7 @@ export async function onRequestPost(context) {
         // For this demo, we'll assume the db stores a hash (or we compare simplisticly).
         // We'll use Web Crypto API for SHA-256 for a basic level of security.
 
-        const db = context.env.DB;
+        const db = context.env.MINAV_DB;
         const user = await db.prepare('SELECT * FROM users WHERE username = ?').bind(username).first();
 
         if (!user) {
