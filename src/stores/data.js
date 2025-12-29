@@ -4,6 +4,7 @@ import { ref, computed } from 'vue'
 export const useDataStore = defineStore('data', () => {
     const items = ref([])
     const categories = ref([])
+    const settings = ref({})
     const loading = ref(false)
     const error = ref(null)
 
@@ -122,6 +123,48 @@ export const useDataStore = defineStore('data', () => {
         return await res.json()
     }
 
+    async function updateCategory(token, id, category) {
+        const res = await fetch(`/api/admin/categories/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify(category)
+        })
+        if (!res.ok) throw new Error('Failed to update category')
+        return await res.json()
+    }
+
+    async function deleteCategory(token, id) {
+        const res = await fetch(`/api/admin/categories/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        if (!res.ok) throw new Error('Failed to delete category')
+        return await res.json()
+    }
+
+    async function fetchSettings() {
+        try {
+            const res = await fetch('/api/public/settings')
+            if (res.ok) {
+                settings.value = await res.json()
+            }
+        } catch (e) {
+            console.error('Failed to fetch settings', e)
+        }
+    }
+
+    async function updateSettings(token, newSettings) {
+        const res = await fetch('/api/admin/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify(newSettings)
+        })
+        if (!res.ok) throw new Error('Failed to update settings')
+        // Optimistically update or re-fetch
+        settings.value = { ...settings.value, ...newSettings }
+        return await res.json()
+    }
+
     async function submitItem(item) {
         const res = await fetch('/api/public/submit', {
             method: 'POST',
@@ -132,5 +175,5 @@ export const useDataStore = defineStore('data', () => {
         return await res.json()
     }
 
-    return { items, categories, groupedItems, categoryCounts, filters, loading, error, fetchPublicData, fetchAdminItems, createItem, updateItem, deleteItem, fetchAdminCategories, createCategory, submitItem }
+    return { items, categories, groupedItems, categoryCounts, filters, loading, error, settings, fetchPublicData, fetchAdminItems, createItem, updateItem, deleteItem, fetchAdminCategories, createCategory, updateCategory, deleteCategory, submitItem, fetchSettings, updateSettings }
 })

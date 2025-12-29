@@ -7,11 +7,11 @@ export async function onRequestGet(context) {
 export async function onRequestPost(context) {
     const db = context.env.MINAV_DB;
     try {
-        const { name, icon, sort_order } = await context.request.json();
+        const { name, description, icon, sort_order } = await context.request.json();
 
         const { success, meta } = await db.prepare(
-            `INSERT INTO categories (name, icon, sort_order) VALUES (?, ?, ?)`
-        ).bind(name, icon, sort_order || 0).run();
+            `INSERT INTO categories (name, description, icon, sort_order) VALUES (?, ?, ?, ?)`
+        ).bind(name, description, icon, sort_order || 0).run();
 
         return new Response(JSON.stringify({ success, id: meta.last_row_id }), { headers: { 'Content-Type': 'application/json' } });
     } catch (err) {

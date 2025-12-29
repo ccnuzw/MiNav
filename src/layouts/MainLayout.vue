@@ -4,9 +4,9 @@
     <header class="w-full px-6 py-4 flex justify-between items-center max-w-full mx-auto border-b border-gray-200 dark:border-dark-border bg-white dark:bg-dark-card sticky top-0 z-40">
         <div class="flex items-center space-x-2">
             <div class="text-2xl font-bold flex flex-col leading-tight">
-                <span class="text-gray-800 dark:text-white">MiNav</span>
+                <span class="text-gray-800 dark:text-white">{{ settings.site_name || 'MiNav' }}</span>
                 <span class="flex items-center text-primary dark:text-accent text-sm">
-                    Cloudflare Tools
+                    {{ settings.site_tagline || 'Cloudflare Tools' }}
                     <i class="fas fa-cloud text-primary dark:text-accent ml-1"></i>
                 </span>
             </div>
@@ -39,12 +39,10 @@
             <nav class="space-y-2 mb-8">
                 <h4 class="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">分类</h4>
                 <a href="#" @click.prevent="scrollToTop" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-primary bg-primary/10 dark:text-accent dark:bg-accent/10 hover:bg-primary/20 dark:hover:bg-accent/20 transition">
-                    <span class="material-symbols-outlined mr-2 text-lg">category</span>
                     全部项目
                     <span class="ml-auto text-xs font-semibold px-2 py-0.5 bg-primary/20 dark:bg-accent/20 rounded-full text-primary dark:text-accent">{{ totalItemsCount }}</span>
                 </a>
-                <a v-for="cat in categories" :key="cat.id" :href="'#cat-' + cat.id" @click.prevent="scrollToCategory(cat.id)" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
-                    <span class="material-symbols-outlined mr-2 text-lg">{{ cat.icon || 'folder' }}</span>
+                <a v-for="cat in categories.filter(c => c.name !== '全部项目')" :key="cat.id" :href="'#cat-' + cat.id" @click.prevent="scrollToCategory(cat.id)" class="flex items-center px-3 py-2 text-sm font-medium rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition">
                     {{ cat.name }}
                     <span class="ml-auto text-xs font-semibold px-2 py-0.5 bg-gray-200 dark:bg-gray-700 rounded-full text-gray-600 dark:text-gray-300">{{ categoryCounts[cat.id] || 0 }}</span>
                 </a>
@@ -111,9 +109,16 @@ import { useDataStore } from '../stores/data';
 import { storeToRefs } from 'pinia';
 
 const dataStore = useDataStore();
-const { categories, categoryCounts, items, filters } = storeToRefs(dataStore);
+const { categories, categoryCounts, items, filters, settings } = storeToRefs(dataStore);
 
 const totalItemsCount = computed(() => items.value.length);
+
+onMounted(() => {
+    // Ensure settings are fetched if not already valid
+    if (Object.keys(settings.value).length === 0) {
+        dataStore.fetchSettings();
+    }
+});
 
 const toggleDarkMode = () => {
     document.documentElement.classList.toggle('dark');

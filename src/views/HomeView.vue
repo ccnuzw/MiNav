@@ -2,14 +2,13 @@
   <MainLayout>
     <div class="text-center mb-16 relative z-10">
         <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-4 text-gray-900 dark:text-white">
-            发现最好的
+            {{ settings.hero_title || '发现最好的' }}
         </h1>
         <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6">
-            <span class="text-primary dark:text-accent">Cloudflare</span> <span class="text-primary dark:text-accent">开源工具 &amp; 文档</span>
+            <span class="text-primary dark:text-accent">{{ settings.hero_subtitle || 'Cloudflare 开源工具 & 文档' }}</span>
         </h2>
-        <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg mb-10 leading-relaxed">
-            出海第一站，搞定工具栈，一系列基于CloudFlare的开源工具 &amp; <br />
-            技术栈，旨在帮助独立开发者快速构建和发布SaaS产品。
+        <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto text-lg mb-10 leading-relaxed whitespace-pre-line">
+            {{ settings.hero_description || '出海第一站，搞定工具栈，一系列基于CloudFlare的开源工具 & 技术栈，旨在帮助独立开发者快速构建和发布SaaS产品。' }}
         </p>
         <!-- Search Bar -->
         <div class="max-w-2xl mx-auto relative mb-6">
@@ -50,7 +49,7 @@
              <button @click="quickFilter = 'all'" :class="quickFilter === 'all' ? 'bg-primary dark:bg-accent text-white' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'" class="px-6 py-1.5 rounded shadow-sm text-sm font-medium transition whitespace-nowrap">
                 全部
             </button>
-            <button v-for="cat in categories.slice(0, 3)" :key="cat.id" @click="quickFilter = cat.id" 
+            <button v-for="cat in categories.filter(c => c.name !== '全部项目').slice(0, 4)" :key="cat.id" @click="quickFilter = cat.id" 
                 :class="quickFilter === cat.id ? 'bg-primary dark:bg-accent text-white' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'"
                 class="px-6 py-1.5 rounded text-sm font-medium transition whitespace-nowrap">
                 {{ cat.name }}
@@ -72,7 +71,6 @@
     <div v-else class="space-y-8">
         <div v-for="category in filteredGroups" :key="category.id" :id="'cat-' + category.id" class="space-y-4">
             <h3 v-if="category.items.length > 0" class="text-2xl font-bold text-gray-900 dark:text-white flex items-center">
-                <span class="material-symbols-outlined mr-2 text-2xl" v-if="category.icon">{{ category.icon }}</span>
                 {{ category.name }}
             </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -156,7 +154,7 @@ import { useDataStore } from '../stores/data';
 import { storeToRefs } from 'pinia';
 
 const dataStore = useDataStore();
-const { groupedItems, loading, error, categories } = storeToRefs(dataStore);
+const { groupedItems, loading, error, categories, settings } = storeToRefs(dataStore);
 const searchQuery = ref('');
 const sortBy = ref('default');
 const quickFilter = ref('all');
@@ -165,6 +163,7 @@ const submitForm = ref({ name: '', url: '', category_id: null, description: '' }
 
 onMounted(() => {
     dataStore.fetchPublicData();
+    dataStore.fetchSettings();
 });
 
 const handleSubmit = async () => {

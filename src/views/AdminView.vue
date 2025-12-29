@@ -2,10 +2,10 @@
   <div class="min-h-screen bg-secondary-bg dark:bg-dark-bg p-8 text-gray-900 dark:text-white">
     <div class="max-w-6xl mx-auto">
         <div class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-bold">Admin Dashboard</h1>
+            <h1 class="text-3xl font-bold">后台管理</h1>
             <div class="flex items-center space-x-4">
-                 <span class="text-sm text-gray-500">Welcome, Admin</span>
-                 <button @click="logout" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition">Logout</button>
+                 <span class="text-sm text-gray-500">欢迎, 管理员</span>
+                 <button @click="logout" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition">退出登录</button>
             </div>
         </div>
         
@@ -15,12 +15,17 @@
                 @click="activeTab = 'items'"
                 :class="activeTab === 'items' ? 'bg-white dark:bg-dark-card shadow' : ''"
                 class="px-4 py-2 rounded-md text-sm font-medium transition"
-            >Items</button>
+            >项目管理</button>
             <button 
                 @click="activeTab = 'categories'"
                 :class="activeTab === 'categories' ? 'bg-white dark:bg-dark-card shadow' : ''"
                 class="px-4 py-2 rounded-md text-sm font-medium transition"
-            >Categories</button>
+            >分类管理</button>
+            <button 
+                @click="activeTab = 'settings'"
+                :class="activeTab === 'settings' ? 'bg-white dark:bg-dark-card shadow' : ''"
+                class="px-4 py-2 rounded-md text-sm font-medium transition"
+            >网站设置</button>
         </div>
 
         <div v-if="activeTab === 'items'">
@@ -28,6 +33,9 @@
         </div>
         <div v-if="activeTab === 'categories'">
             <AdminCategories />
+        </div>
+        <div v-if="activeTab === 'settings'">
+            <AdminSettings />
         </div>
     </div>
   </div>
@@ -40,6 +48,7 @@ import { useDataStore } from '../stores/data';
 import { useRouter } from 'vue-router';
 import AdminItems from '../components/AdminItems.vue';
 import AdminCategories from '../components/AdminCategories.vue';
+import AdminSettings from '../components/AdminSettings.vue';
 
 const authStore = useAuthStore();
 const dataStore = useDataStore();

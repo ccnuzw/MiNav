@@ -1,9 +1,9 @@
 <template>
   <div class="bg-white dark:bg-dark-card p-6 rounded-lg shadow">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-bold dark:text-white">Categories Management</h2>
-        <button @click="showAddModal = true" class="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover transition">
-            Add Category
+        <h2 class="text-xl font-bold dark:text-white">分类管理</h2>
+        <button @click="openAddModal" class="px-4 py-2 bg-primary text-white rounded hover:bg-primary-hover transition">
+            添加分类
         </button>
     </div>
 
@@ -11,10 +11,10 @@
         <table class="w-full text-left text-sm text-gray-500 dark:text-gray-400">
             <thead class="bg-gray-50 dark:bg-gray-700 text-xs uppercase text-gray-700 dark:text-gray-300">
                 <tr>
-                    <th scope="col" class="px-6 py-3">Name</th>
-                    <th scope="col" class="px-6 py-3">Icon</th>
-                    <th scope="col" class="px-6 py-3">Sort Order</th>
-                    <th scope="col" class="px-6 py-3">Actions</th>
+                    <th scope="col" class="px-6 py-3">名称</th>
+                    <th scope="col" class="px-6 py-3">图标 (Material Icon)</th>
+                    <th scope="col" class="px-6 py-3">排序</th>
+                    <th scope="col" class="px-6 py-3">操作</th>
                 </tr>
             </thead>
             <tbody>
@@ -23,8 +23,8 @@
                     <td class="px-6 py-4"><span class="material-symbols-outlined">{{ cat.icon }}</span> ({{ cat.icon }})</td>
                     <td class="px-6 py-4">{{ cat.sort_order }}</td>
                     <td class="px-6 py-4 space-x-2">
-                        <button disabled class="text-gray-400 cursor-not-allowed">Edit</button>
-                         <!-- Edit implementation skipped for brevity but structure matches items -->
+                        <button @click="openEditModal(cat)" class="text-blue-600 hover:text-blue-900 dark:text-blue-400 dark:hover:text-blue-300">编辑</button>
+                        <button @click="deleteCategory(cat.id)" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">删除</button>
                     </td>
                 </tr>
             </tbody>
@@ -34,23 +34,34 @@
     <!-- Modal -->
     <div v-if="showAddModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white dark:bg-dark-card p-6 rounded-lg w-full max-w-md">
-            <h3 class="text-lg font-bold mb-4 dark:text-white">Add Category</h3>
+            <h3 class="text-lg font-bold mb-4 dark:text-white">{{ isEditing ? '编辑分类' : '添加分类' }}</h3>
             <form @submit.prevent="handleSubmit" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium dark:text-gray-300">Name</label>
+                    <label class="block text-sm font-medium dark:text-gray-300">名称</label>
                     <input v-model="form.name" type="text" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" required />
                 </div>
                 <div>
-                    <label class="block text-sm font-medium dark:text-gray-300">Icon (Material Symbol)</label>
-                    <input v-model="form.icon" type="text" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="category" />
+                    <label class="block text-sm font-medium dark:text-gray-300">描述</label>
+                    <textarea v-model="form.description" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="分类描述..."></textarea>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium dark:text-gray-300">图标 (Material Symbol)</label>
+                    <div class="grid grid-cols-6 gap-2 mt-2 max-h-40 overflow-y-auto border p-2 rounded dark:border-gray-600">
+                         <button type="button" v-for="icon in predefinedIcons" :key="icon" @click="form.icon = icon" 
+                            :class="form.icon === icon ? 'bg-primary text-white' : 'hover:bg-gray-100 dark:hover:bg-gray-700'"
+                            class="p-2 rounded flex items-center justify-center transition">
+                            <span class="material-symbols-outlined">{{ icon }}</span>
+                         </button>
+                    </div>
+                    <input v-model="form.icon" type="text" class="w-full border rounded px-3 py-2 mt-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="自定义图标代码 (e.g. home)" />
                 </div>
                  <div>
-                    <label class="block text-sm font-medium dark:text-gray-300">Sort Order</label>
+                    <label class="block text-sm font-medium dark:text-gray-300">排序</label>
                     <input v-model="form.sort_order" type="number" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" />
                 </div>
                 <div class="flex justify-end space-x-2 mt-4">
-                    <button type="button" @click="showAddModal = false" class="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400">Cancel</button>
-                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded">Save</button>
+                    <button type="button" @click="showAddModal = false" class="px-4 py-2 text-gray-500 hover:text-gray-700 dark:text-gray-400">取消</button>
+                    <button type="submit" class="px-4 py-2 bg-primary text-white rounded">保存</button>
                 </div>
             </form>
         </div>
@@ -63,12 +74,21 @@ import { ref, onMounted } from 'vue';
 import { useDataStore } from '../stores/data';
 import { useAuthStore } from '../stores/auth';
 
+const predefinedIcons = [
+    'folder', 'image', 'mail', 'link', 'code', 'settings', 'star', 'home', 
+    'cloud', 'database', 'security', 'api', 'terminal', 'search', 'person', 
+    'group', 'work', 'build', 'extension', 'palette', 'public', 'dns', 'vpn_lock',
+    'shopping_cart', 'visibility', 'lock', 'schedule', 'language', 'help'
+];
+
 const categories = ref([]);
 const dataStore = useDataStore();
 const authStore = useAuthStore();
 
 const showAddModal = ref(false);
-const form = ref({ name: '', icon: '', sort_order: 0 });
+const isEditing = ref(false);
+const editingId = ref(null);
+const form = ref({ name: '', icon: '', sort_order: 0, description: '' });
 
 onMounted(async () => {
     await loadCategories();
@@ -82,11 +102,40 @@ const loadCategories = async () => {
     }
 }
 
-const handleSubmit = async () => {
-    await dataStore.createCategory(authStore.token, form.value);
-    showAddModal.value = false;
-    form.value = { name: '', icon: '', sort_order: 0 };
+const openAddModal = () => {
+    isEditing.value = false;
+    form.value = { name: '', icon: '', sort_order: 0, description: '' };
+    showAddModal.value = true;
+}
+
+const openEditModal = (cat) => {
+    isEditing.value = true;
+    editingId.value = cat.id;
+    form.value = {
+        name: cat.name,
+        icon: cat.icon,
+        sort_order: cat.sort_order,
+        description: cat.description || ''
+    };
+    showAddModal.value = true;
+}
+
+const deleteCategory = async (id) => {
+    if(!confirm('确定要删除这个分类吗?')) return;
+    await dataStore.deleteCategory(authStore.token, id);
     await loadCategories();
-    // Emit event to reload categories in parent if needed, but not strictly required for this view
+}
+
+const handleSubmit = async () => {
+    if (isEditing.value) {
+        await dataStore.updateCategory(authStore.token, editingId.value, form.value);
+    } else {
+        await dataStore.createCategory(authStore.token, form.value);
+    }
+    showAddModal.value = false;
+    form.value = { name: '', icon: '', sort_order: 0, description: '' };
+    isEditing.value = false;
+    editingId.value = null;
+    await loadCategories();
 }
 </script>
