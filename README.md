@@ -1,5 +1,121 @@
-# MiNav
+# MiNav - Cloudflare 导航仪表盘
 
-This template should help get you started developing with Vue 3 in Vite. The template uses Vue 3 `<script setup>` SFCs, check out the [script setup docs](https://v3.vuejs.org/api/sfc-script-setup.html#sfc-script-setup) to learn more.
+MiNav 是一个基于 Cloudflare 技术栈构建的轻量级、高性能导航仪表盘。它允许您通过现代化的响应式界面管理和展示您最喜爱的工具、文档和资源链接。
 
-Learn more about IDE Support for Vue in the [Vue Docs Scaling up Guide](https://vuejs.org/guide/scaling-up/tooling.html#ide-support).
+## ✨ 特性
+
+- **Cloudflare 原生**: 基于 Cloudflare Pages, D1 (数据库), 和 KV (键值存储) 构建。
+- **后台管理**: 完整的增删改查 (CRUD) 功能，支持项目和分类管理。
+- **动态设置**: 直接在后台管理面板自定义站点名称、标语和主页文本。
+- **响应式设计**: 使用 Vue 3, Tailwind CSS 和 FontAwesome/Material Symbols 构建的现代化 UI。
+- **安全**: 后台管理区域提供基础的会话认证保护。
+
+## 🛠 技术栈
+
+- **前端**: Vue 3, Vite, Tailwind CSS
+- **后端**: Cloudflare Pages Functions
+- **数据库**: Cloudflare D1 (SQLite)
+- **存储**: Cloudflare KV (会话管理)
+
+## 📋 前置要求
+
+- [Node.js](https://nodejs.org/) (v16.13.0 或更高版本)
+- [Wrangler CLI](https://developers.cloudflare.com/workers/wrangler/install-and-update/) (`npm install -g wrangler`)
+- 一个 Cloudflare 账号
+
+## 💻 本地开发
+
+1. **克隆仓库**
+   ```bash
+   git clone <your-repo-url>
+   cd MiNav
+   ```
+
+2. **安装依赖**
+   ```bash
+   npm install
+   ```
+
+3. **设置本地 D1 数据库**
+   初始化本地 D1 数据库结构：
+   ```bash
+   npx wrangler d1 execute MINAV_DB --local --file=./schema.sql
+   ```
+
+4. **启动开发服务器**
+   使用 Wrangler 启动开发服务器 (模拟 Cloudflare 环境)：
+   ```bash
+   npx wrangler pages dev .
+   ```
+   *注意: 访问地址为 `http://localhost:8788`。*
+
+5. **初始化管理员**
+   服务器启动后，访问以下地址创建默认管理员账户：
+   `http://localhost:8788/api/setup`
+   
+   **默认凭据:**
+   - **用户名**: `admin`
+   - **密码**: `admin`
+
+## 🚀 部署
+
+### 1. 创建 Cloudflare 资源
+
+**D1 数据库:**
+```bash
+npx wrangler d1 create minav-db
+```
+*请记录输出中的 `database_id`。*
+
+**KV 命名空间:**
+```bash
+npx wrangler kv:namespace create minav-kv
+```
+*请记录输出中的 `id`。*
+
+### 2. 配置 `wrangler.toml`
+
+使用上一步获取的 ID 更新您的 `wrangler.toml` 文件：
+
+```toml
+name = "minav"
+pages_build_output_dir = "dist"
+
+[[d1_databases]]
+binding = "MINAV_DB"
+database_name = "minav-db"
+database_id = "<YOUR_DATABASE_ID>"
+
+[[kv_namespaces]]
+binding = "MINAV_KV"
+id = "<YOUR_KV_ID>"
+```
+
+### 3. 初始化远程数据库
+
+将数据库结构应用到您的生产环境 D1 数据库：
+```bash
+npx wrangler d1 execute minav-db --remote --file=./schema.sql
+```
+
+### 4. 部署到 Cloudflare Pages
+
+构建并部署应用：
+```bash
+npm run build
+npx wrangler pages deploy dist
+```
+
+或者，将您的 GitHub 仓库连接到 Cloudflare Pages 并配置构建设置：
+- **构建命令**: `npm run build`
+- **构建输出目录**: `dist`
+- **环境变量**: 无需配置 (绑定通过仪表盘的 设置 > Functions 进行配置)。
+
+### 5. 设置远程管理员
+
+部署完成后，访问您的线上站点 URL 来初始化管理员用户：
+`https://<your-project>.pages.dev/api/setup`
+
+## 📄 许可证
+
+MIT

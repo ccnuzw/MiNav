@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS items;
 DROP TABLE IF EXISTS categories;
 CREATE TABLE categories (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -48,3 +49,14 @@ INSERT INTO site_settings (key, value) VALUES
 ('hero_title', '发现最好的'),
 ('hero_subtitle', 'Cloudflare 开源工具 & 文档'),
 ('hero_description', '出海第一站，搞定工具栈，一系列基于CloudFlare的开源工具 & 技术栈，旨在帮助独立开发者快速构建和发布SaaS产品。');
+
+DROP TABLE IF EXISTS friend_links;
+CREATE TABLE friend_links (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  url TEXT NOT NULL,
+  description TEXT,
+  icon TEXT,
+  sort_order INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);

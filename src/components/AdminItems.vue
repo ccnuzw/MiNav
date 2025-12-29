@@ -3,7 +3,7 @@
     <div class="flex justify-between items-center mb-6">
         <h2 class="text-xl font-bold dark:text-white">项目管理</h2>
         <div class="flex items-center space-x-2">
-            <select v-model="filterCategoryId" class="border rounded px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white">
+            <select v-model="filterCategoryId" @change="resetAndLoad" class="border rounded px-3 py-2 text-sm dark:bg-gray-800 dark:border-gray-600 dark:text-white">
                 <option value="all">所有分类</option>
                 <option v-for="cat in categories.filter(c => c.name !== '全部项目')" :key="cat.id" :value="cat.id">{{ cat.name }}</option>
             </select>
@@ -20,15 +20,17 @@
                     <th scope="col" class="px-6 py-3">名称</th>
                     <th scope="col" class="px-6 py-3">链接</th>
                     <th scope="col" class="px-6 py-3">分类</th>
+                    <th scope="col" class="px-6 py-3">排序</th>
                     <th scope="col" class="px-6 py-3">状态</th>
                     <th scope="col" class="px-6 py-3">操作</th>
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="item in filteredItems" :key="item.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
+                <tr v-for="item in items" :key="item.id" class="border-b dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800">
                     <td class="px-6 py-4 font-medium text-gray-900 dark:text-white">{{ item.name }}</td>
                     <td class="px-6 py-4 truncate max-w-xs">{{ item.url }}</td>
                     <td class="px-6 py-4">{{ getCategoryName(item.category_id) }}</td>
+                    <td class="px-6 py-4">{{ item.sort_order }}</td>
                     <td class="px-6 py-4">
                         <span :class="item.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'" class="px-2 py-0.5 rounded text-xs">{{ item.status }}</span>
                     </td>
@@ -39,6 +41,30 @@
                 </tr>
             </tbody>
         </table>
+    </div>
+
+    <!-- Pagination Controls -->
+    <div class="flex justify-between items-center mt-4 px-2">
+        <span class="text-sm text-gray-700 dark:text-gray-400">
+            显示 {{ (page - 1) * limit + 1 }} 到 {{ Math.min(page * limit, total) }} 条，共 {{ total }} 条
+        </span>
+        <div class="flex space-x-2">
+            <button 
+                @click="changePage(page - 1)" 
+                :disabled="page === 1"
+                class="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 dark:text-white"
+            >
+                上一页
+            </button>
+            <span class="px-3 py-1 text-sm dark:text-white">第 {{ page }} 页</span>
+            <button 
+                @click="changePage(page + 1)" 
+                :disabled="page * limit >= total"
+                class="px-3 py-1 border rounded text-sm disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 dark:hover:bg-gray-700 dark:border-gray-600 dark:text-white"
+            >
+                下一页
+            </button>
+        </div>
     </div>
 
     <!-- Modal (Simplified) -->
@@ -69,6 +95,10 @@
                     <input v-model="form.icon" type="text" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" placeholder="fab fa-github" />
                 </div>
                  <div>
+                    <label class="block text-sm font-medium dark:text-gray-300">排序 (Sort Order)</label>
+                    <input v-model="form.sort_order" type="number" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white" />
+                </div>
+                 <div>
                     <label class="block text-sm font-medium dark:text-gray-300">状态</label>
                     <select v-model="form.status" class="w-full border rounded px-3 py-2 dark:bg-gray-800 dark:border-gray-600 dark:text-white">
                         <option value="active">启用</option>
@@ -86,33 +116,46 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useDataStore } from '../stores/data';
 import { useAuthStore } from '../stores/auth';
 
 const props = defineProps(['categories']);
 const items = ref([]);
+const total = ref(0);
+const page = ref(1);
+const limit = ref(20);
+
 const dataStore = useDataStore();
 const authStore = useAuthStore();
 
 const showAddModal = ref(false);
 const editingItem = ref(null);
-const form = ref({ name: '', url: '', category_id: null, description: '', icon: '', status: 'active' });
+const form = ref({ name: '', url: '', category_id: null, description: '', icon: '', status: 'active', sort_order: 0 });
 const filterCategoryId = ref('all');
-
-const filteredItems = computed(() => {
-    if (filterCategoryId.value === 'all') {
-        return items.value;
-    }
-    return items.value.filter(item => item.category_id === filterCategoryId.value);
-});
 
 onMounted(async () => {
     await loadItems();
 });
 
 const loadItems = async () => {
-    items.value = await dataStore.fetchAdminItems(authStore.token);
+    try {
+        const res = await dataStore.fetchAdminItems(authStore.token, page.value, limit.value, filterCategoryId.value);
+        items.value = res.results;
+        total.value = res.total;
+    } catch (e) {
+        console.error(e);
+    }
+}
+
+const changePage = (newPage) => {
+    page.value = newPage;
+    loadItems();
+}
+
+const resetAndLoad = () => {
+    page.value = 1;
+    loadItems();
 }
 
 const getCategoryName = (id) => {
@@ -135,7 +178,7 @@ const deleteItem = async (id) => {
 const closeModal = () => {
     showAddModal.value = false;
     editingItem.value = null;
-    form.value = { name: '', url: '', category_id: null, description: '', icon: '', status: 'active' };
+    form.value = { name: '', url: '', category_id: null, description: '', icon: '', status: 'active', sort_order: 0 };
 }
 
 const handleSubmit = async () => {

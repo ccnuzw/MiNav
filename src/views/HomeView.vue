@@ -154,7 +154,7 @@ import { useDataStore } from '../stores/data';
 import { storeToRefs } from 'pinia';
 
 const dataStore = useDataStore();
-const { groupedItems, loading, error, categories, settings } = storeToRefs(dataStore);
+const { groupedItems, loading, error, categories, settings, friendLinks } = storeToRefs(dataStore);
 const searchQuery = ref('');
 const sortBy = ref('default');
 const quickFilter = ref('all');

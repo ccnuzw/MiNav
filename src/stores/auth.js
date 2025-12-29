@@ -37,5 +37,22 @@ export const useAuthStore = defineStore('auth', () => {
         }
     }
 
-    return { token, isAuthenticated, login, logout }
+    async function changePassword(oldPassword, newPassword) {
+        const res = await fetch('/api/admin/password', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token.value}`
+            },
+            body: JSON.stringify({ oldPassword, newPassword })
+        })
+
+        if (!res.ok) {
+            const data = await res.json().catch(() => ({}))
+            throw new Error(data.error || 'Failed to change password')
+        }
+        return await res.json()
+    }
+
+    return { token, isAuthenticated, login, logout, changePassword }
 })

@@ -4,6 +4,7 @@ import { ref, computed } from 'vue'
 export const useDataStore = defineStore('data', () => {
     const items = ref([])
     const categories = ref([])
+    const friendLinks = ref([])
     const settings = ref({})
     const loading = ref(false)
     const error = ref(null)
@@ -64,6 +65,11 @@ export const useDataStore = defineStore('data', () => {
             const data = await res.json()
             items.value = data.items || []
             categories.value = data.categories || []
+            // Friend links
+            const flRes = await fetch('/api/public/friend_links')
+            if (flRes.ok) {
+                friendLinks.value = await flRes.json()
+            }
         } catch (e) {
             error.value = e.message
         } finally {
@@ -72,8 +78,12 @@ export const useDataStore = defineStore('data', () => {
     }
 
     // Admin Actions
-    async function fetchAdminItems(token) {
-        const res = await fetch('/api/admin/items', { headers: { Authorization: `Bearer ${token}` } })
+    async function fetchAdminItems(token, page = 1, limit = 20, categoryId = null) {
+        let url = `/api/admin/items?page=${page}&limit=${limit}`;
+        if (categoryId && categoryId !== 'all') {
+            url += `&category_id=${categoryId}`;
+        }
+        const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } })
         if (!res.ok) throw new Error('Failed to fetch admin items')
         return await res.json()
     }
@@ -165,15 +175,58 @@ export const useDataStore = defineStore('data', () => {
         return await res.json()
     }
 
+    // Friend Links Actions
+    async function fetchAdminFriendLinks(token) {
+        const res = await fetch('/api/admin/friend_links', { headers: { Authorization: `Bearer ${token}` } })
+        if (!res.ok) throw new Error('Failed to fetch friend links')
+        return await res.json()
+    }
+
+    async function createFriendLink(token, link) {
+        const res = await fetch('/api/admin/friend_links', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify(link)
+        })
+        if (!res.ok) throw new Error('Failed to create friend link')
+        return await res.json()
+    }
+
+    async function updateFriendLink(token, id, link) {
+        const res = await fetch(`/api/admin/friend_links/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify(link)
+        })
+        if (!res.ok) throw new Error('Failed to update friend link')
+        return await res.json()
+    }
+
+    async function deleteFriendLink(token, id) {
+        const res = await fetch(`/api/admin/friend_links/${id}`, {
+            method: 'DELETE',
+            headers: { Authorization: `Bearer ${token}` }
+        })
+        if (!res.ok) throw new Error('Failed to delete friend link')
+        return await res.json()
+    }
+
     async function submitItem(item) {
         const res = await fetch('/api/public/submit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(item)
         })
-        if (!res.ok) throw new Error('Submission failed')
+        if (!res.ok) {
+            let msg = 'Submission failed';
+            try {
+                const errData = await res.json();
+                msg = errData.error || msg;
+            } catch (e) { }
+            throw new Error(msg);
+        }
         return await res.json()
     }
 
-    return { items, categories, groupedItems, categoryCounts, filters, loading, error, settings, fetchPublicData, fetchAdminItems, createItem, updateItem, deleteItem, fetchAdminCategories, createCategory, updateCategory, deleteCategory, submitItem, fetchSettings, updateSettings }
+    return { items, categories, groupedItems, categoryCounts, filters, loading, error, settings, friendLinks, fetchPublicData, fetchAdminItems, createItem, updateItem, deleteItem, fetchAdminCategories, createCategory, updateCategory, deleteCategory, submitItem, fetchSettings, updateSettings, fetchAdminFriendLinks, createFriendLink, updateFriendLink, deleteFriendLink }
 })

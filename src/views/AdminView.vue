@@ -26,6 +26,16 @@
                 :class="activeTab === 'settings' ? 'bg-white dark:bg-dark-card shadow' : ''"
                 class="px-4 py-2 rounded-md text-sm font-medium transition"
             >网站设置</button>
+            <button 
+                @click="activeTab = 'friendlinks'"
+                :class="activeTab === 'friendlinks' ? 'bg-white dark:bg-dark-card shadow' : ''"
+                class="px-4 py-2 rounded-md text-sm font-medium transition"
+            >友情链接</button>
+            <button 
+                @click="activeTab = 'account'"
+                :class="activeTab === 'account' ? 'bg-white dark:bg-dark-card shadow' : ''"
+                class="px-4 py-2 rounded-md text-sm font-medium transition"
+            >账户安全</button>
         </div>
 
         <div v-if="activeTab === 'items'">
@@ -36,6 +46,12 @@
         </div>
         <div v-if="activeTab === 'settings'">
             <AdminSettings />
+        </div>
+        <div v-if="activeTab === 'friendlinks'">
+            <AdminFriendLinks />
+        </div>
+        <div v-if="activeTab === 'account'">
+            <AdminAccount />
         </div>
     </div>
   </div>
@@ -49,6 +65,8 @@ import { useRouter } from 'vue-router';
 import AdminItems from '../components/AdminItems.vue';
 import AdminCategories from '../components/AdminCategories.vue';
 import AdminSettings from '../components/AdminSettings.vue';
+import AdminFriendLinks from '../components/AdminFriendLinks.vue';
+import AdminAccount from '../components/AdminAccount.vue';
 
 const authStore = useAuthStore();
 const dataStore = useDataStore();
