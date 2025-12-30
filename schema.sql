@@ -101,8 +101,8 @@ CREATE TABLE rss_feeds (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT NOT NULL,
     url TEXT NOT NULL,
-    icon TEXT,
     status TEXT DEFAULT 'active', -- active, error, inactive
+    show_in_list INTEGER DEFAULT 1, -- 0: hidden, 1: visible in frontend list
     last_sync INTEGER,
     created_at INTEGER DEFAULT (strftime('%s', 'now'))
 );

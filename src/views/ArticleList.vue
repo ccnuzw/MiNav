@@ -68,7 +68,9 @@ onMounted(async () => {
     }
     const res = await fetch('/api/public/articles');
     if (!res.ok) throw new Error('Failed to fetch articles');
-    articles.value = await res.json();
+    const data = await res.json();
+    // Handle both array (legacy) and paginated object (new)
+    articles.value = Array.isArray(data) ? data : (data.items || []);
   } catch (e) {
     error.value = '加载文章失败，请稍后重试';
     console.error(e);
