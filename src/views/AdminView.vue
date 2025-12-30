@@ -1,11 +1,11 @@
 <template>
   <div class="min-h-screen bg-secondary-bg dark:bg-dark-bg p-8 text-gray-900 dark:text-white">
     <div class="max-w-6xl mx-auto">
-        <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-            <h1 class="text-3xl font-bold">后台管理</h1>
-            <div class="flex items-center space-x-4 w-full md:w-auto justify-between md:justify-end">
-                 <span class="text-sm text-gray-500">欢迎, 管理员</span>
-                 <button @click="logout" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition text-sm">退出登录</button>
+        <div class="flex flex-row justify-between items-center mb-6 gap-4">
+            <h1 class="text-2xl md:text-3xl font-bold whitespace-nowrap">后台管理</h1>
+            <div class="flex items-center space-x-4">
+                 <span class="hidden md:inline text-sm text-gray-500">欢迎, 管理员</span>
+                 <button @click="logout" class="px-3 py-1.5 md:px-4 md:py-2 bg-red-500 hover:bg-red-600 text-white rounded transition text-xs md:text-sm whitespace-nowrap">退出登录</button>
             </div>
         </div>
         

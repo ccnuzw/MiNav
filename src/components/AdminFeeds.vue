@@ -4,14 +4,14 @@
       <h2 class="text-xl font-bold text-gray-800 dark:text-white">订阅源管理</h2>
       <div class="flex gap-2">
         <button 
-          @click="syncFeeds"
+          @click="initiateSync"
           :disabled="syncing"
           class="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition text-sm disabled:opacity-50"
         >
           <svg class="w-4 h-4" :class="{'animate-spin': syncing}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
           </svg>
-          {{ syncing ? '同步中...' : '同步全部' }}
+          {{ syncing ? '同步中...' : (selectedFeeds.length > 0 ? `同步选中 (${selectedFeeds.length})` : '同步全部') }}
         </button>
         <button 
           @click="showAddModal = true"
@@ -30,6 +30,9 @@
       <table class="w-full text-left border-collapse">
         <thead>
           <tr class="text-xs text-gray-500 dark:text-gray-400 border-b border-gray-100 dark:border-dark-border">
+            <th class="py-3 px-4 w-10">
+                <input type="checkbox" :checked="isAllSelected" @change="toggleSelectAll" class="rounded border-gray-300 dark:border-dark-border dark:bg-dark-bg focus:ring-primary text-primary" />
+            </th>
             <th class="py-3 font-medium">源名称</th>
             <th class="py-3 font-medium">地址 (URL)</th>
             <th class="py-3 font-medium">上次同步</th>
@@ -39,10 +42,10 @@
         </thead>
         <tbody class="text-sm">
           <tr v-if="loading" class="animate-pulse">
-             <td colspan="5" class="py-4 text-center text-gray-500">加载中...</td>
+             <td colspan="6" class="py-4 text-center text-gray-500">加载中...</td>
           </tr>
           <tr v-else-if="feeds.length === 0">
-             <td colspan="5" class="py-4 text-center text-gray-500">暂无订阅源，请添加</td>
+             <td colspan="6" class="py-4 text-center text-gray-500">暂无订阅源，请添加</td>
           </tr>
           <tr 
             v-else 
@@ -50,6 +53,9 @@
             :key="feed.id"
             class="border-b border-gray-50 dark:border-dark-border last:border-0 hover:bg-gray-50 dark:hover:bg-dark-bg/50 transition group"
           >
+            <td class="py-3 px-4">
+                <input type="checkbox" :value="feed.id" v-model="selectedFeeds" class="rounded border-gray-300 dark:border-dark-border dark:bg-dark-bg focus:ring-primary text-primary" />
+            </td>
             <td class="py-3 pr-4 font-medium text-gray-800 dark:text-white">{{ feed.name }}</td>
             <td class="py-3 text-gray-400 text-xs max-w-xs truncate" :title="feed.url">{{ feed.url }}</td>
             <td class="py-3 text-gray-500">{{ formatTime(feed.last_sync) || '从未' }}</td>
@@ -91,26 +97,38 @@
             v-else
             v-for="feed in feeds" 
             :key="feed.id" 
-            class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative"
+            class="bg-white dark:bg-dark-card p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm relative space-y-3"
         >
-            <div class="flex justify-between items-start mb-2 gap-2">
-                <div class="flex-1 min-w-0">
-                    <h4 class="font-bold text-gray-900 dark:text-white break-all leading-tight mb-1">{{ feed.name }}</h4>
-                    <div class="text-xs text-gray-500 break-all">{{ feed.url }}</div>
+            <div class="flex items-start gap-3">
+                <!-- Checkbox -->
+                <div class="flex items-center pt-1">
+                    <input type="checkbox" :value="feed.id" v-model="selectedFeeds" class="w-5 h-5 rounded border-gray-300 dark:border-dark-border dark:bg-dark-bg focus:ring-primary text-primary" />
                 </div>
-                 <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 whitespace-nowrap">
-                    活跃
-                 </span>
+                
+                <!-- Content -->
+                <div class="flex-1 min-w-0 space-y-1">
+                    <div class="flex justify-between items-start gap-2">
+                         <h4 class="text-base font-bold text-gray-900 dark:text-white break-all leading-tight">{{ feed.name }}</h4>
+                         <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 whitespace-nowrap shrink-0">
+                            活跃
+                         </span>
+                    </div>
+                    <div class="text-xs text-gray-500 break-all font-mono bg-gray-50 dark:bg-dark-bg/50 px-2 py-1 rounded select-all">{{ feed.url }}</div>
+                </div>
             </div>
             
-            <div class="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-gray-700 mt-2">
-                 <div class="text-xs text-gray-400">上次同步: {{ formatTime(feed.last_sync) || '从未' }}</div>
-                 <div class="space-x-2">
-                    <button @click="openEditModal(feed)" class="px-3 py-1 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition">
-                        编辑
+            <!-- Footer Info & Actions -->
+            <div class="flex justify-between items-center pt-3 border-t border-gray-100 dark:border-dark-border">
+                 <div class="text-xs text-gray-400 flex items-center gap-1">
+                    <i class="fas fa-clock"></i>
+                    {{ formatTime(feed.last_sync) || '从未' }}
+                 </div>
+                 <div class="flex items-center gap-3">
+                    <button @click="openEditModal(feed)" class="text-gray-500 hover:text-primary transition p-1">
+                        <i class="fas fa-edit"></i>
                     </button>
-                    <button @click="deleteFeed(feed.id)" class="px-3 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition">
-                        删除
+                    <button @click="deleteFeed(feed.id)" class="text-gray-500 hover:text-red-500 transition p-1">
+                        <i class="fas fa-trash-alt"></i>
                     </button>
                  </div>
             </div>
@@ -144,11 +162,90 @@
       </div>
     </Teleport>
 
+    <!-- Sync Preview Modal -->
+    <Teleport to="body">
+      <div v-if="showSyncModal" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" @click="showSyncModal = false"></div>
+        <div class="relative bg-white dark:bg-dark-card rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col">
+            <div class="p-6 border-b border-gray-100 dark:border-dark-border flex justify-between items-center">
+                <h3 class="text-lg font-bold text-gray-900 dark:text-white">同步预览</h3>
+                <button @click="showSyncModal = false" class="text-gray-400 hover:text-gray-500">
+                    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
+                <div v-if="itemLoading" class="text-center py-8">
+                    <svg class="animate-spin h-8 w-8 text-primary mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="text-gray-500">正在获取 RSS 内容...</p>
+                </div>
+                <div v-else>
+                    <div v-if="previewItems.length === 0" class="text-center py-8 text-gray-500">
+                        未在订阅源中发现文章
+                    </div>
+                    <div v-else>
+                        <!-- Desktop Table -->
+                        <div class="hidden md:block">
+                            <table class="w-full text-left text-sm">
+                                <thead>
+                                    <tr class="text-gray-500 dark:text-gray-400 border-b dark:border-dark-border">
+                                        <th class="py-2 font-medium">标题</th>
+                                        <th class="py-2 font-medium w-48">来源</th>
+                                        <th class="py-2 font-medium w-40">发布时间</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(item, idx) in paginatedPreviewItems" :key="idx" class="border-b border-gray-50 dark:border-dark-border last:border-0 hover:bg-gray-50 dark:hover:bg-dark-bg/50 transition">
+                                        <td class="py-3 pr-4 font-medium dark:text-white truncate max-w-lg" :title="item.title">{{ item.title }}</td>
+                                        <td class="py-3 text-gray-500 truncate" :title="item.feedName">{{ item.feedName }}</td>
+                                        <td class="py-3 text-gray-500 whitespace-nowrap text-xs">{{ new Date(item.pubDate).toLocaleString() }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Mobile Cards -->
+                        <div class="grid grid-cols-1 gap-3 md:hidden">
+                            <div v-for="(item, idx) in paginatedPreviewItems" :key="idx" class="bg-gray-50 dark:bg-dark-bg/50 p-3 rounded-lg border border-gray-100 dark:border-dark-border">
+                                <h4 class="font-bold text-gray-900 dark:text-white mb-1 line-clamp-2 text-sm">{{ item.title }}</h4>
+                                <div class="flex justify-between items-center text-xs text-gray-500">
+                                    <span class="bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-300 truncate max-w-[120px]">{{ item.feedName }}</span>
+                                    <span>{{ new Date(item.pubDate).toLocaleDateString() }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
+                             <span class="text-xs text-gray-500">共 {{ previewItems.length }} 条记录</span>
+                             <div class="flex gap-2 w-full sm:w-auto justify-center">
+                                <button class="px-3 py-1.5 border rounded-lg text-xs disabled:opacity-50 dark:border-dark-border dark:text-white hover:bg-gray-50 dark:hover:bg-dark-bg transition" :disabled="previewPage === 1" @click="previewPage--">上一页</button>
+                                <span class="text-xs py-1.5 px-2 dark:text-white font-medium">{{ previewPage }} / {{ Math.ceil(previewItems.length / previewLimit) }}</span>
+                                <button class="px-3 py-1.5 border rounded-lg text-xs disabled:opacity-50 dark:border-dark-border dark:text-white hover:bg-gray-50 dark:hover:bg-dark-bg transition" :disabled="previewPage * previewLimit >= previewItems.length" @click="previewPage++">下一页</button>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-6 border-t border-gray-100 dark:border-dark-border flex justify-end gap-3">
+                <button @click="showSyncModal = false" class="px-4 py-2 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-dark-border rounded-lg">取消</button>
+                <button @click="confirmSync" :disabled="itemLoading || previewItems.length === 0 || syncing" class="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-hover disabled:opacity-50">
+                    {{ syncing ? '同步中...' : '确定同步' }}
+                </button>
+            </div>
+        </div>
+      </div>
+    </Teleport>
+
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue';
+import { ref, onMounted, reactive, computed } from 'vue';
 import { useNotificationStore } from '../stores/notification';
 import { useAuthStore } from '../stores/auth';
 
@@ -157,6 +254,9 @@ const authStore = useAuthStore();
 const feeds = ref([]);
 const loading = ref(false);
 const syncing = ref(false);
+
+const selectedFeeds = ref([]);
+const isAllSelected = computed(() => feeds.value.length > 0 && selectedFeeds.value.length === feeds.value.length);
 
 const showAddModal = ref(false);
 const adding = ref(false);
@@ -167,9 +267,29 @@ const form = reactive({
     url: ''
 });
 
+// Sync Preview State
+const showSyncModal = ref(false);
+const itemLoading = ref(false);
+const previewItems = ref([]);
+const previewPage = ref(1);
+const previewLimit = 20;
+
+const paginatedPreviewItems = computed(() => {
+    const start = (previewPage.value - 1) * previewLimit;
+    return previewItems.value.slice(start, start + previewLimit);
+});
+
 onMounted(() => {
     fetchFeeds();
 });
+
+const toggleSelectAll = () => {
+    if (isAllSelected.value) {
+        selectedFeeds.value = [];
+    } else {
+        selectedFeeds.value = feeds.value.map(f => f.id);
+    }
+};
 
 const fetchFeeds = async () => {
     loading.value = true;
@@ -254,6 +374,8 @@ const deleteFeed = async (id) => {
         if(res.ok) {
             notification.success('已删除');
             feeds.value = feeds.value.filter(f => f.id !== id);
+             // Remove from selection if exists
+             selectedFeeds.value = selectedFeeds.value.filter(fid => fid !== id);
         } else {
             throw new Error('删除失败');
         }
@@ -262,17 +384,56 @@ const deleteFeed = async (id) => {
     }
 };
 
-const syncFeeds = async () => {
+const initiateSync = async () => {
+    showSyncModal.value = true;
+    itemLoading.value = true;
+    previewItems.value = [];
+    previewPage.value = 1;
+
+    const ids = selectedFeeds.value.length > 0 ? selectedFeeds.value : []; // Empty means all in our API logic, or we can pass all IDs. 
+    // Logic: If user selects nothing -> Sync All. If selects some -> Sync Some.
+    // However, for Preview of "All" it might be slow.
+    // Let's assume selection empty = sync all.
+
+    try {
+        const res = await fetch('/api/admin/feeds/preview', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authStore.token}` 
+            },
+            body: JSON.stringify({ ids })
+        });
+        const data = await res.json();
+        if (data.items) {
+            previewItems.value = data.items;
+        }
+    } catch (e) {
+        notification.error('获取预览失败');
+    } finally {
+        itemLoading.value = false;
+    }
+};
+
+const confirmSync = async () => {
     syncing.value = true;
+    // We sync what was selected regardless of preview, assuming preview was consistent.
+    const ids = selectedFeeds.value.length > 0 ? selectedFeeds.value : []; 
     try {
         const res = await fetch('/api/admin/feeds/sync', {
             method: 'POST',
-            headers: { 'Authorization': `Bearer ${authStore.token}` }
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authStore.token}` 
+            },
+            body: JSON.stringify({ ids })
         });
         const data = await res.json();
         if(data.success) {
             notification.success(`同步完成，新增 ${data.new_items} 篇文章`);
-            fetchFeeds(); // Update last sync time
+            showSyncModal.value = false;
+            fetchFeeds();
+            selectedFeeds.value = [];
         } else {
             notification.error('同步出现错误');
         }
@@ -282,4 +443,6 @@ const syncFeeds = async () => {
         syncing.value = false;
     }
 };
+
+// Removed old syncFeeds, replaced by initiateSync + confirmSync flow
 </script>
