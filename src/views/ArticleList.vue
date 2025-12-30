@@ -80,6 +80,15 @@ onMounted(async () => {
 });
 
 const handleArticleClick = (article) => {
+    // If Global Mode is 'live', ALWAYS redirect to original URL (no local storage means no local view)
+    if (settings.value.rss_global_mode === 'live') {
+         if (article.original_url) {
+             window.open(article.original_url, '_blank');
+         }
+         return;
+    }
+
+    // Local Mode: Check user preference for redirect
     if (settings.value.article_redirect_enabled === 'true' && article.original_url) {
         window.open(article.original_url, '_blank');
     } else {
