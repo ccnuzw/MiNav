@@ -1,12 +1,12 @@
 <template>
   <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm p-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-      <div class="flex flex-wrap items-center gap-3">
-          <h2 class="text-xl font-bold text-gray-800 dark:text-white">订阅源管理</h2>
+      <div class="flex flex-row items-center gap-3 w-full sm:w-auto">
+          <h2 class="text-xl font-bold text-gray-800 dark:text-white shrink-0">订阅源管理</h2>
           
           <!-- Global Mode Toggle -->
-          <div class="flex items-center gap-2 text-sm">
-              <span class="text-gray-500">全局模式:</span>
+          <div class="flex items-center gap-2 text-sm ml-auto sm:ml-0">
+              <span class="text-gray-500 hidden xs:inline">全局模式:</span>
               <button 
                 @click="toggleGlobalMode"
                 class="px-2 py-0.5 rounded-full text-xs font-medium border transition flex items-center gap-1"
@@ -130,42 +130,38 @@
                 </div>
                 
                 <!-- Content -->
-                <div class="flex-1 min-w-0 space-y-1">
-                    <div class="flex flex-col gap-1">
-                        <div class="flex justify-between items-start gap-2">
-                             <h4 class="text-base font-bold text-gray-900 dark:text-white break-all leading-tight">{{ feed.name }}</h4>
-                             <div class="flex items-center gap-2 shrink-0">
-                                 <!-- Show Toggle Mobile -->
-                                 <div class="flex items-center gap-1 bg-gray-50 dark:bg-dark-bg/50 px-2 py-0.5 rounded border border-gray-100 dark:border-gray-700">
-                                      <span class="text-[10px] text-gray-500">前台:</span>
-                                      <label class="relative inline-flex items-center cursor-pointer scale-75 origin-left">
-                                         <input type="checkbox" :checked="feed.show_in_list === 1" @change="toggleShowInList(feed)" class="sr-only peer">
-                                         <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                                      </label>
-                                 </div>
-                                 <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 whitespace-nowrap">
-                                    活跃
-                                 </span>
-                             </div>
-                        </div>
-                        <div class="text-xs text-gray-500 break-all font-mono bg-gray-50 dark:bg-dark-bg/50 px-2 py-1 rounded select-all">{{ feed.url }}</div>
+                <div class="flex-1 min-w-0 space-y-2">
+                    <div class="flex justify-between items-start gap-2">
+                         <h4 class="text-base font-bold text-gray-900 dark:text-white break-all leading-tight">{{ feed.name }}</h4>
+                         <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 whitespace-nowrap shrink-0">活跃</span>
                     </div>
+                    <div class="text-xs text-gray-500 break-all font-mono bg-gray-50 dark:bg-dark-bg/50 px-2 py-1.5 rounded select-all">{{ feed.url }}</div>
                 </div>
             </div>
             
             <!-- Footer Info & Actions -->
-            <div class="flex justify-between items-center pt-3 border-t border-gray-100 dark:border-dark-border">
-                 <div class="text-xs text-gray-400 flex items-center gap-1">
-                    <i class="fas fa-clock"></i>
-                    {{ formatTime(feed.last_sync) || '从未' }}
+            <div class="flex flex-wrap gap-y-2 justify-between items-center pt-3 border-t border-gray-100 dark:border-dark-border">
+                 <!-- Show Toggle Mobile -->
+                 <div class="flex items-center gap-2">
+                      <label class="relative inline-flex items-center cursor-pointer scale-75 origin-left -ml-1.5">
+                         <input type="checkbox" :checked="feed.show_in_list === 1" @change="toggleShowInList(feed)" class="sr-only peer">
+                         <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                      </label>
+                      <span class="text-xs text-gray-500" :class="{'text-primary font-medium': feed.show_in_list === 1}">{{ feed.show_in_list === 1 ? '前台可见' : '前台隐藏' }}</span>
                  </div>
-                 <div class="flex items-center gap-3">
-                    <button @click="openEditModal(feed)" class="text-gray-500 hover:text-primary transition p-1">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button @click="deleteFeed(feed.id)" class="text-gray-500 hover:text-red-500 transition p-1">
-                        <i class="fas fa-trash-alt"></i>
-                    </button>
+
+                 <div class="flex items-center gap-4">
+                    <div class="text-xs text-gray-300 hidden sm:block">
+                        {{ formatTime(feed.last_sync) || '从未同步' }}
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <button @click="openEditModal(feed)" class="text-gray-500 hover:text-primary transition p-1">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button @click="deleteFeed(feed.id)" class="text-gray-500 hover:text-red-500 transition p-1">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
                  </div>
             </div>
         </div>
