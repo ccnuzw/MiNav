@@ -27,17 +27,17 @@
                 <span v-if="article.source" class="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded ml-2">{{ article.source }}</span>
                 <span v-if="article.views" class="flex items-center gap-1 ml-auto"><i class="fas fa-eye"></i> {{ article.views }}</span>
               </div>
-              <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 hover:text-primary transition">
-                <router-link :to="'/articles/' + article.id">{{ article.title }}</router-link>
+              <h2 class="text-xl font-bold text-gray-900 dark:text-white mb-2 line-clamp-2 hover:text-primary transition cursor-pointer" @click="handleArticleClick(article)">
+                {{ article.title }}
               </h2>
               <p class="text-gray-600 dark:text-gray-400 text-sm line-clamp-2 mb-4">
                 {{ article.summary }}
               </p>
             </div>
             <div class="flex justify-between items-center mt-auto">
-               <router-link :to="'/articles/' + article.id" class="text-primary hover:text-primary-hover font-medium text-sm flex items-center">
+               <button @click="handleArticleClick(article)" class="text-primary hover:text-primary-hover font-medium text-sm flex items-center">
                  阅读全文 <i class="fas fa-arrow-right ml-1 text-xs"></i>
-               </router-link>
+               </button>
             </div>
           </div>
         </article>
@@ -48,14 +48,24 @@
 
 <script setup>
 import { ref, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import MainLayout from '../layouts/MainLayout.vue';
+import { useDataStore } from '../stores/data';
+import { storeToRefs } from 'pinia';
 
+const router = useRouter();
+const dataStore = useDataStore();
+const { settings } = storeToRefs(dataStore);
 const articles = ref([]);
 const loading = ref(true);
 const error = ref(null);
 
 onMounted(async () => {
   try {
+    // Fetch settings to ensure we have the redirect preference
+    if (Object.keys(settings.value).length === 0) {
+        await dataStore.fetchSettings();
+    }
     const res = await fetch('/api/public/articles');
     if (!res.ok) throw new Error('Failed to fetch articles');
     articles.value = await res.json();
@@ -66,6 +76,14 @@ onMounted(async () => {
     loading.value = false;
   }
 });
+
+const handleArticleClick = (article) => {
+    if (settings.value.article_redirect_enabled === 'true' && article.original_url) {
+        window.open(article.original_url, '_blank');
+    } else {
+        router.push('/articles/' + article.id);
+    }
+};
 
 const formatDate = (dateStr) => {
   if(!dateStr) return '';

@@ -8,19 +8,21 @@
                 <i class="fas fa-bars text-xl"></i>
             </button>
             <div class="flex items-center gap-3">
-                <!-- Custom Logo -->
-                <div v-if="settings.site_logo" class="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 dark:bg-accent/10 overflow-hidden shrink-0">
-                    <img v-if="settings.site_logo.startsWith('http') || settings.site_logo.startsWith('/')" :src="settings.site_logo" alt="Logo" class="w-full h-full object-contain" />
-                    <i v-else :class="settings.site_logo" class="text-xl text-primary dark:text-accent"></i>
-                </div>
-                
-                <div class="text-2xl font-bold flex flex-col leading-tight">
-                    <span class="text-gray-800 dark:text-white">{{ settings.site_name || 'MiNav' }}</span>
-                    <span class="flex items-center text-primary dark:text-accent text-sm">
-                        {{ settings.site_tagline || 'Cloudflare Tools' }}
-                        <i v-if="!settings.site_logo" class="fas fa-cloud text-primary dark:text-accent ml-1"></i>
-                    </span>
-                </div>
+                <router-link to="/" class="flex items-center gap-3 hover:opacity-80 transition">
+                    <!-- Custom Logo -->
+                    <div v-if="settings.site_logo" class="flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 dark:bg-accent/10 overflow-hidden shrink-0">
+                        <img v-if="settings.site_logo.startsWith('http') || settings.site_logo.startsWith('/')" :src="settings.site_logo" alt="Logo" class="w-full h-full object-contain" />
+                        <i v-else :class="settings.site_logo" class="text-xl text-primary dark:text-accent"></i>
+                    </div>
+                    
+                    <div class="text-2xl font-bold flex flex-col leading-tight text-left">
+                        <span class="text-gray-800 dark:text-white">{{ settings.site_name || 'MiNav' }}</span>
+                        <span class="flex items-center text-primary dark:text-accent text-sm">
+                            {{ settings.site_tagline || 'Cloudflare Tools' }}
+                            <i v-if="!settings.site_logo" class="fas fa-cloud text-primary dark:text-accent ml-1"></i>
+                        </span>
+                    </div>
+                </router-link>
             </div>
         </div>
         <div class="flex items-center space-x-6 text-xl">

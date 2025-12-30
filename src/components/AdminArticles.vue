@@ -2,7 +2,22 @@
   <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm p-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
       <h2 class="text-xl font-bold text-gray-800 dark:text-white">文章管理</h2>
-      <div class="flex gap-2">
+      <div class="flex gap-4 items-center">
+        <!-- Global Redirect Switch -->
+        <div class="flex items-center gap-2">
+            <span class="text-sm text-gray-600 dark:text-gray-400">优先访问原文</span>
+            <button 
+                @click="toggleRedirectSwitch" 
+                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-dark-card"
+                :class="settings.article_redirect_enabled === 'true' ? 'bg-primary' : 'bg-gray-200 dark:bg-gray-700'"
+            >
+                <span 
+                    class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform"
+                    :class="settings.article_redirect_enabled === 'true' ? 'translate-x-6' : 'translate-x-1'"
+                />
+            </button>
+        </div>
+
         <button 
           @click="openEditModal()"
           class="flex items-center gap-2 px-4 py-2 bg-primary hover:bg-primary-hover text-white rounded-lg transition text-sm"
@@ -426,4 +441,55 @@ const batchDelete = async () => {
 const togglePreview = () => {
     showPreview.value = !showPreview.value;
 };
+
+// Global Settings Logic
+const settings = ref({});
+
+const fetchSettings = async () => {
+    try {
+        // We reuse the public settings endpoint for reading
+        const res = await fetch('/api/public/settings'); 
+        if (res.ok) {
+            settings.value = await res.json();
+            if (!settings.value.article_redirect_enabled) {
+                // Default to false if not set
+                settings.value.article_redirect_enabled = 'false';
+            }
+        }
+    } catch (e) {
+        // Silent error
+    }
+};
+
+const toggleRedirectSwitch = async () => {
+    const newValue = settings.value.article_redirect_enabled === 'true' ? 'false' : 'true';
+    settings.value.article_redirect_enabled = newValue;
+    
+    try {
+        const res = await fetch('/api/admin/settings', {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authStore.token}` 
+            },
+            body: JSON.stringify({ article_redirect_enabled: newValue })
+        });
+        
+        if (res.ok) {
+            notification.success(`优先访问原文已${newValue === 'true' ? '开启' : '关闭'}`);
+        } else {
+            throw new Error('设置保存失败');
+        }
+    } catch (e) {
+        notification.error(e.message);
+        // Revert on error
+        settings.value.article_redirect_enabled = newValue === 'true' ? 'false' : 'true';
+    }
+};
+
+// Fetch settings on mount
+onMounted(() => {
+    fetchArticles();
+    fetchSettings();
+});
 </script>

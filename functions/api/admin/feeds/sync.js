@@ -1,10 +1,23 @@
 export async function onRequestPost(context) {
-    const { env } = context;
+    const { request, env } = context;
     try {
-        // 1. Get all active feeds
-        const { results: feeds } = await env.MINAV_DB.prepare(
-            "SELECT * FROM rss_feeds WHERE status = 'active'"
-        ).all();
+        let ids = [];
+        try {
+            const body = await request.json();
+            if (body && body.ids) ids = body.ids;
+        } catch (e) {
+            // body might be empty if just POSTing to sync all
+        }
+
+        let query = "SELECT * FROM rss_feeds WHERE status = 'active'";
+        let params = [];
+
+        if (ids && Array.isArray(ids) && ids.length > 0) {
+            query += ` AND id IN (${ids.map(() => '?').join(',')})`;
+            params = ids;
+        }
+
+        const { results: feeds } = await env.MINAV_DB.prepare(query).bind(...params).all();
 
         if (!feeds || feeds.length === 0) {
             return Response.json({ message: "No active feeds to sync", count: 0 });
@@ -39,12 +52,17 @@ export async function onRequestPost(context) {
                     const clean = (s) => s ? s.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1').trim() : '';
                     const stripHtml = (s) => s ? s.replace(/<[^>]+>/g, '').trim() : '';
 
-                    const link = linkMatch ? (isAtom ? linkMatch[1] : linkMatch[1]) : null;
+                    let link = linkMatch ? (isAtom ? linkMatch[1] : linkMatch[1]) : null;
                     const title = clean(titleMatch ? titleMatch[1] : 'Untitled');
                     const guid = clean(guidMatch ? guidMatch[1] : link); // Fallback to link if no guid
                     const content = clean(contentMatch ? contentMatch[1] : '');
                     const pubDateStr = clean(pubDateMatch ? pubDateMatch[1] : '');
                     const pubDate = pubDateStr ? new Date(pubDateStr).getTime() : Date.now();
+
+                    // Fallback: If link is missing but guid is a URL, use guid as link
+                    if (!link && guid && guid.startsWith('http')) {
+                        link = guid;
+                    }
 
                     // Cover image extraction
                     let cover_image = '';
