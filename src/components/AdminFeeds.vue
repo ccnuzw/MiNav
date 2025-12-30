@@ -97,29 +97,38 @@
             v-else
             v-for="feed in feeds" 
             :key="feed.id" 
-            class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm relative"
+            class="bg-white dark:bg-dark-card p-4 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm relative space-y-3"
         >
-            <div class="flex justify-between items-start mb-2 gap-2">
-                <div class="flex items-center h-full pt-1 mr-2">
-                    <input type="checkbox" :value="feed.id" v-model="selectedFeeds" class="rounded border-gray-300 dark:border-dark-border dark:bg-dark-bg focus:ring-primary text-primary" />
+            <div class="flex items-start gap-3">
+                <!-- Checkbox -->
+                <div class="flex items-center pt-1">
+                    <input type="checkbox" :value="feed.id" v-model="selectedFeeds" class="w-5 h-5 rounded border-gray-300 dark:border-dark-border dark:bg-dark-bg focus:ring-primary text-primary" />
                 </div>
-                <div class="flex-1 min-w-0">
-                    <h4 class="font-bold text-gray-900 dark:text-white break-all leading-tight mb-1">{{ feed.name }}</h4>
-                    <div class="text-xs text-gray-500 break-all">{{ feed.url }}</div>
+                
+                <!-- Content -->
+                <div class="flex-1 min-w-0 space-y-1">
+                    <div class="flex justify-between items-start gap-2">
+                         <h4 class="text-base font-bold text-gray-900 dark:text-white break-all leading-tight">{{ feed.name }}</h4>
+                         <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 whitespace-nowrap shrink-0">
+                            活跃
+                         </span>
+                    </div>
+                    <div class="text-xs text-gray-500 break-all font-mono bg-gray-50 dark:bg-dark-bg/50 px-2 py-1 rounded select-all">{{ feed.url }}</div>
                 </div>
-                 <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 whitespace-nowrap">
-                    活跃
-                 </span>
             </div>
             
-            <div class="flex justify-between items-center pt-3 border-t border-gray-200 dark:border-gray-700 mt-2">
-                 <div class="text-xs text-gray-400">上次同步: {{ formatTime(feed.last_sync) || '从未' }}</div>
-                 <div class="space-x-2">
-                    <button @click="openEditModal(feed)" class="px-3 py-1 text-xs bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded hover:bg-indigo-200 dark:hover:bg-indigo-900/50 transition">
-                        编辑
+            <!-- Footer Info & Actions -->
+            <div class="flex justify-between items-center pt-3 border-t border-gray-100 dark:border-dark-border">
+                 <div class="text-xs text-gray-400 flex items-center gap-1">
+                    <i class="fas fa-clock"></i>
+                    {{ formatTime(feed.last_sync) || '从未' }}
+                 </div>
+                 <div class="flex items-center gap-3">
+                    <button @click="openEditModal(feed)" class="text-gray-500 hover:text-primary transition p-1">
+                        <i class="fas fa-edit"></i>
                     </button>
-                    <button @click="deleteFeed(feed.id)" class="px-3 py-1 text-xs bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400 rounded hover:bg-red-200 dark:hover:bg-red-900/50 transition">
-                        删除
+                    <button @click="deleteFeed(feed.id)" class="text-gray-500 hover:text-red-500 transition p-1">
+                        <i class="fas fa-trash-alt"></i>
                     </button>
                  </div>
             </div>
@@ -165,7 +174,7 @@
                 </button>
             </div>
             
-            <div class="p-6 overflow-y-auto flex-1">
+            <div class="p-6 overflow-y-auto flex-1 custom-scrollbar">
                 <div v-if="itemLoading" class="text-center py-8">
                     <svg class="animate-spin h-8 w-8 text-primary mx-auto mb-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -178,30 +187,44 @@
                         未在订阅源中发现文章
                     </div>
                     <div v-else>
-                        <table class="w-full text-left text-sm">
-                            <thead>
-                                <tr class="text-gray-500 dark:text-gray-400 border-b dark:border-dark-border">
-                                    <th class="py-2">标题</th>
-                                    <th class="py-2">来源</th>
-                                    <th class="py-2">发布时间</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr v-for="(item, idx) in paginatedPreviewItems" :key="idx" class="border-b dark:border-dark-border last:border-0">
-                                    <td class="py-2 pr-4 font-medium dark:text-white">{{ item.title }}</td>
-                                    <td class="py-2 text-gray-500">{{ item.feedName }}</td>
-                                    <td class="py-2 text-gray-500 whitespace-nowrap">{{ new Date(item.pubDate).toLocaleString() }}</td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <!-- Desktop Table -->
+                        <div class="hidden md:block">
+                            <table class="w-full text-left text-sm">
+                                <thead>
+                                    <tr class="text-gray-500 dark:text-gray-400 border-b dark:border-dark-border">
+                                        <th class="py-2 font-medium">标题</th>
+                                        <th class="py-2 font-medium w-48">来源</th>
+                                        <th class="py-2 font-medium w-40">发布时间</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr v-for="(item, idx) in paginatedPreviewItems" :key="idx" class="border-b border-gray-50 dark:border-dark-border last:border-0 hover:bg-gray-50 dark:hover:bg-dark-bg/50 transition">
+                                        <td class="py-3 pr-4 font-medium dark:text-white truncate max-w-lg" :title="item.title">{{ item.title }}</td>
+                                        <td class="py-3 text-gray-500 truncate" :title="item.feedName">{{ item.feedName }}</td>
+                                        <td class="py-3 text-gray-500 whitespace-nowrap text-xs">{{ new Date(item.pubDate).toLocaleString() }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Mobile Cards -->
+                        <div class="grid grid-cols-1 gap-3 md:hidden">
+                            <div v-for="(item, idx) in paginatedPreviewItems" :key="idx" class="bg-gray-50 dark:bg-dark-bg/50 p-3 rounded-lg border border-gray-100 dark:border-dark-border">
+                                <h4 class="font-bold text-gray-900 dark:text-white mb-1 line-clamp-2 text-sm">{{ item.title }}</h4>
+                                <div class="flex justify-between items-center text-xs text-gray-500">
+                                    <span class="bg-gray-200 dark:bg-gray-700 px-1.5 py-0.5 rounded text-gray-600 dark:text-gray-300 truncate max-w-[120px]">{{ item.feedName }}</span>
+                                    <span>{{ new Date(item.pubDate).toLocaleDateString() }}</span>
+                                </div>
+                            </div>
+                        </div>
 
                         <!-- Pagination -->
-                        <div class="flex justify-between items-center mt-4">
+                        <div class="flex flex-col sm:flex-row justify-between items-center mt-6 gap-4">
                              <span class="text-xs text-gray-500">共 {{ previewItems.length }} 条记录</span>
-                             <div class="flex gap-2">
-                                <button class="px-2 py-1 border rounded text-xs disabled:opacity-50 dark:border-dark-border dark:text-white" :disabled="previewPage === 1" @click="previewPage--">上一页</button>
-                                <span class="text-xs py-1 dark:text-white">{{ previewPage }} / {{ Math.ceil(previewItems.length / previewLimit) }}</span>
-                                <button class="px-2 py-1 border rounded text-xs disabled:opacity-50 dark:border-dark-border dark:text-white" :disabled="previewPage * previewLimit >= previewItems.length" @click="previewPage++">下一页</button>
+                             <div class="flex gap-2 w-full sm:w-auto justify-center">
+                                <button class="px-3 py-1.5 border rounded-lg text-xs disabled:opacity-50 dark:border-dark-border dark:text-white hover:bg-gray-50 dark:hover:bg-dark-bg transition" :disabled="previewPage === 1" @click="previewPage--">上一页</button>
+                                <span class="text-xs py-1.5 px-2 dark:text-white font-medium">{{ previewPage }} / {{ Math.ceil(previewItems.length / previewLimit) }}</span>
+                                <button class="px-3 py-1.5 border rounded-lg text-xs disabled:opacity-50 dark:border-dark-border dark:text-white hover:bg-gray-50 dark:hover:bg-dark-bg transition" :disabled="previewPage * previewLimit >= previewItems.length" @click="previewPage++">下一页</button>
                              </div>
                         </div>
                     </div>
