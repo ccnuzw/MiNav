@@ -1,11 +1,11 @@
 <template>
   <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm p-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-      <div class="flex flex-col gap-1">
+      <div class="flex flex-wrap items-center gap-3">
           <h2 class="text-xl font-bold text-gray-800 dark:text-white">订阅源管理</h2>
           
           <!-- Global Mode Toggle -->
-          <div class="flex items-center gap-2 text-sm mt-1">
+          <div class="flex items-center gap-2 text-sm">
               <span class="text-gray-500">全局模式:</span>
               <button 
                 @click="toggleGlobalMode"
@@ -131,22 +131,24 @@
                 
                 <!-- Content -->
                 <div class="flex-1 min-w-0 space-y-1">
-                    <div class="flex justify-between items-start gap-2">
-                         <h4 class="text-base font-bold text-gray-900 dark:text-white break-all leading-tight">{{ feed.name }}</h4>
-                         <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 whitespace-nowrap shrink-0">
-                            活跃
-                         </span>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <!-- Show Toggle Mobile -->
-                        <div class="flex items-center gap-1 bg-gray-50 dark:bg-dark-bg/50 px-2 py-1 rounded border border-gray-100 dark:border-gray-700">
-                             <span class="text-[10px] text-gray-500">前台:</span>
-                             <label class="relative inline-flex items-center cursor-pointer scale-75 origin-left">
-                                <input type="checkbox" :checked="feed.show_in_list === 1" @change="toggleShowInList(feed)" class="sr-only peer">
-                                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
-                             </label>
+                    <div class="flex flex-col gap-1">
+                        <div class="flex justify-between items-start gap-2">
+                             <h4 class="text-base font-bold text-gray-900 dark:text-white break-all leading-tight">{{ feed.name }}</h4>
+                             <div class="flex items-center gap-2 shrink-0">
+                                 <!-- Show Toggle Mobile -->
+                                 <div class="flex items-center gap-1 bg-gray-50 dark:bg-dark-bg/50 px-2 py-0.5 rounded border border-gray-100 dark:border-gray-700">
+                                      <span class="text-[10px] text-gray-500">前台:</span>
+                                      <label class="relative inline-flex items-center cursor-pointer scale-75 origin-left">
+                                         <input type="checkbox" :checked="feed.show_in_list === 1" @change="toggleShowInList(feed)" class="sr-only peer">
+                                         <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                                      </label>
+                                 </div>
+                                 <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 whitespace-nowrap">
+                                    活跃
+                                 </span>
+                             </div>
                         </div>
-                        <div class="text-xs text-gray-500 break-all font-mono bg-gray-50 dark:bg-dark-bg/50 px-2 py-1 rounded select-all flex-1 text-right">{{ feed.url }}</div>
+                        <div class="text-xs text-gray-500 break-all font-mono bg-gray-50 dark:bg-dark-bg/50 px-2 py-1 rounded select-all">{{ feed.url }}</div>
                     </div>
                 </div>
             </div>
@@ -530,7 +532,7 @@ const toggleShowInList = async (feed) => {
         if(!res.ok) throw new Error('更新失败');
         
         feed.show_in_list = newVal;
-        // notification.success(`已${newVal ? '显示' : '隐藏'}该订阅源`); // Optional toast
+        notification.success(`已${newVal ? '显示' : '隐藏'}该订阅源`);
     } catch(e) {
         notification.error(e.message);
         // revert logic if needed
