@@ -5,15 +5,37 @@ export async function onRequestPut(context) {
 
     try {
         const body = await request.json();
-        const { name, url } = body;
 
-        if (!name || !url) {
-            return Response.json({ error: "Name and URL are required" }, { status: 400 });
+        // Build dynamic update query
+        const fields = [];
+        const values = [];
+
+        if (body.name) {
+            fields.push("name = ?");
+            values.push(body.name);
+        }
+        if (body.url) {
+            fields.push("url = ?");
+            values.push(body.url);
+        }
+        if (body.mode) {
+            fields.push("mode = ?");
+            values.push(body.mode);
+        }
+        if (body.show_in_list !== undefined) {
+            fields.push("show_in_list = ?");
+            values.push(body.show_in_list);
         }
 
+        if (fields.length === 0) {
+            return Response.json({ error: "No fields to update" }, { status: 400 });
+        }
+
+        values.push(id); // For WHERE clause
+
         const { success } = await db.prepare(
-            "UPDATE rss_feeds SET name = ?, url = ? WHERE id = ?"
-        ).bind(name, url, id).run();
+            `UPDATE rss_feeds SET ${fields.join(", ")} WHERE id = ?`
+        ).bind(...values).run();
 
         if (!success) {
             return Response.json({ error: "Failed to update feed" }, { status: 500 });

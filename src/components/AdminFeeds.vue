@@ -1,12 +1,29 @@
 <template>
   <div class="bg-white dark:bg-dark-card rounded-xl shadow-sm p-6">
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-      <h2 class="text-xl font-bold text-gray-800 dark:text-white">订阅源管理</h2>
+      <div class="flex flex-col gap-1">
+          <h2 class="text-xl font-bold text-gray-800 dark:text-white">订阅源管理</h2>
+          
+          <!-- Global Mode Toggle -->
+          <div class="flex items-center gap-2 text-sm mt-1">
+              <span class="text-gray-500">全局模式:</span>
+              <button 
+                @click="toggleGlobalMode"
+                class="px-2 py-0.5 rounded-full text-xs font-medium border transition flex items-center gap-1"
+                :class="globalMode === 'live' ? 'bg-orange-100 text-orange-700 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800' : 'bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'"
+              >
+                <i class="fas" :class="globalMode === 'live' ? 'fa-bolt' : 'fa-database'"></i>
+                {{ globalMode === 'live' ? '实时 (Live)' : '本地 (Local)' }}
+              </button>
+          </div>
+      </div>
+
       <div class="flex gap-2">
         <button 
           @click="initiateSync"
-          :disabled="syncing"
-          class="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition text-sm disabled:opacity-50"
+          :disabled="syncing || globalMode === 'live'"
+          class="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+          :title="globalMode === 'live' ? '实时模式下无需手动同步' : '同步文章到本地数据库'"
         >
           <svg class="w-4 h-4" :class="{'animate-spin': syncing}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
@@ -37,15 +54,16 @@
             <th class="py-3 font-medium">地址 (URL)</th>
             <th class="py-3 font-medium">上次同步</th>
             <th class="py-3 font-medium">状态</th>
+            <th class="py-3 font-medium">前台显示</th> <!-- Renamed from Mode -->
             <th class="py-3 font-medium">操作</th>
           </tr>
         </thead>
         <tbody class="text-sm">
           <tr v-if="loading" class="animate-pulse">
-             <td colspan="6" class="py-4 text-center text-gray-500">加载中...</td>
+             <td colspan="7" class="py-4 text-center text-gray-500">加载中...</td>
           </tr>
           <tr v-else-if="feeds.length === 0">
-             <td colspan="6" class="py-4 text-center text-gray-500">暂无订阅源，请添加</td>
+             <td colspan="7" class="py-4 text-center text-gray-500">暂无订阅源，请添加</td>
           </tr>
           <tr 
             v-else 
@@ -63,6 +81,12 @@
               <span class="px-2 py-0.5 rounded text-xs bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
                 活跃
               </span>
+            </td>
+            <td class="py-3">
+                <label class="relative inline-flex items-center cursor-pointer">
+                  <input type="checkbox" :checked="feed.show_in_list === 1" @change="toggleShowInList(feed)" class="sr-only peer">
+                  <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                </label>
             </td>
             <td class="py-3 flex items-center gap-2">
               <button 
@@ -113,7 +137,17 @@
                             活跃
                          </span>
                     </div>
-                    <div class="text-xs text-gray-500 break-all font-mono bg-gray-50 dark:bg-dark-bg/50 px-2 py-1 rounded select-all">{{ feed.url }}</div>
+                    <div class="flex items-center gap-2">
+                        <!-- Show Toggle Mobile -->
+                        <div class="flex items-center gap-1 bg-gray-50 dark:bg-dark-bg/50 px-2 py-1 rounded border border-gray-100 dark:border-gray-700">
+                             <span class="text-[10px] text-gray-500">前台:</span>
+                             <label class="relative inline-flex items-center cursor-pointer scale-75 origin-left">
+                                <input type="checkbox" :checked="feed.show_in_list === 1" @change="toggleShowInList(feed)" class="sr-only peer">
+                                <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary/50 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all dark:border-gray-600 peer-checked:bg-primary"></div>
+                             </label>
+                        </div>
+                        <div class="text-xs text-gray-500 break-all font-mono bg-gray-50 dark:bg-dark-bg/50 px-2 py-1 rounded select-all flex-1 text-right">{{ feed.url }}</div>
+                    </div>
                 </div>
             </div>
             
@@ -444,5 +478,67 @@ const confirmSync = async () => {
     }
 };
 
-// Removed old syncFeeds, replaced by initiateSync + confirmSync flow
+const globalMode = ref('local');
+
+const fetchGlobalMode = async () => {
+    try {
+        const res = await fetch('/api/public/settings'); // Use public settings which now may contain it, or admin endpoint
+        // Wait, public settings fetches all.
+        const data = await res.json();
+        if (data.rss_global_mode) {
+            globalMode.value = data.rss_global_mode;
+        }
+    } catch (e) {
+        console.error("Error fetching global mode", e);
+    }
+}
+
+const toggleGlobalMode = async () => {
+    const newMode = globalMode.value === 'live' ? 'local' : 'live';
+    try {
+        const res = await fetch('/api/admin/settings', {
+            method: 'POST',
+            headers: { 
+                 'Content-Type': 'application/json',
+                 'Authorization': `Bearer ${authStore.token}` 
+            },
+            body: JSON.stringify({ rss_global_mode: newMode })
+        });
+        
+        if(!res.ok) throw new Error('更新失败');
+        
+        globalMode.value = newMode;
+        notification.success(`全局RSS模式已切换为${newMode === 'live' ? '实时' : '本地'}`);
+        // If switching to local, maybe prompt sync?
+    } catch(e) {
+        notification.error(e.message);
+    }
+};
+
+const toggleShowInList = async (feed) => {
+    const newVal = feed.show_in_list === 1 ? 0 : 1;
+    try {
+        const res = await fetch(`/api/admin/feeds/${feed.id}`, {
+            method: 'PUT',
+            headers: { 
+                 'Content-Type': 'application/json',
+                 'Authorization': `Bearer ${authStore.token}` 
+            },
+            body: JSON.stringify({ show_in_list: newVal })
+        });
+        
+        if(!res.ok) throw new Error('更新失败');
+        
+        feed.show_in_list = newVal;
+        // notification.success(`已${newVal ? '显示' : '隐藏'}该订阅源`); // Optional toast
+    } catch(e) {
+        notification.error(e.message);
+        // revert logic if needed
+    }
+};
+
+onMounted(() => {
+    fetchFeeds();
+    fetchGlobalMode();
+});
 </script>
